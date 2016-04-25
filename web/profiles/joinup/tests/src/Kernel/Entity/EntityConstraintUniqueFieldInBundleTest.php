@@ -109,11 +109,9 @@ class EntityConstraintUniqueFieldInBundleTest extends EntityKernelTestBase {
    * @todo: Fix the description.
    */
   public function assertFieldOverrideConstraint($bundle) {
-    $user = $this->createUser();
     // Check that a random title can be applied in an entity.
     /** @var \Drupal\Core\Entity\EntityInterface $base_field_entity_1 */
     $base_field_entity_1 = $this->storage->create([
-      'uid' => $user->id(),
       'type' => $bundle,
       'label' => $this->randomTitle,
     ]);
