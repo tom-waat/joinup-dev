@@ -8,8 +8,25 @@ use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
  * Tests entity reference selection plugins.
  *
  * @group joinup
+ *
+ * @requires profile joinup
  */
 class EntityConstraintUniqueFieldInBundleTest extends EntityKernelTestBase {
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = [
+    'user',
+    'system',
+    'field',
+    'text',
+    'filter',
+    'entity_test',
+    'rdf_entity',
+  ];
 
   /**
    * The typed data manager to use.
@@ -19,11 +36,15 @@ class EntityConstraintUniqueFieldInBundleTest extends EntityKernelTestBase {
   protected $typedData;
 
   /**
+   * The storage item.
+   *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected $storage;
 
   /**
+   * A random title used repeatedly.
+   *
    * @var string
    */
   protected $randomTitle;
@@ -33,13 +54,19 @@ class EntityConstraintUniqueFieldInBundleTest extends EntityKernelTestBase {
    */
   protected function setUp() {
     parent::setUp();
-
     $this->installEntitySchema('entity_test_field_override');
-
     $this->typedData = $this->container->get('typed_data_manager');
     $this->storage = $this->entityManager->getStorage('entity_test_field_override');
     entity_test_create_bundle('some_test_bundle', 'some_test_bundle', 'entity_test_field_override');
 
+  }
+
+  /**
+   * Tests the actual entity functionality.
+   *
+   * @todo: Fix description.
+   */
+  public function testFieldOverrideConstraint() {
     // Set the constraints to the base and override field.
     /** @var \Drupal\Core\Field\FieldDefinitionInterface $base_definition */
     $base_definition = $this->entityManager->getFieldDefinitions('entity_test_field_override', 'entity_test_field_override')['name'];
@@ -49,9 +76,7 @@ class EntityConstraintUniqueFieldInBundleTest extends EntityKernelTestBase {
     $override_definition->getItemDefinition()->addConstraint('UniqueFieldInBundle', ['bundles' => ['some_test_bundle']]);
 
     $this->randomTitle = $this->randomMachineName();
-  }
 
-  function testFieldOverrideConstraint(){
     // Test for bundle entity_test_field_override.
     $this->assertFieldOverrideConstraint('entity_test_field_override');
 
@@ -60,21 +85,23 @@ class EntityConstraintUniqueFieldInBundleTest extends EntityKernelTestBase {
   }
 
   /**
+   * The actual testing.
+   *
    * @param string $bundle
    *   A bundle name.
+   *
+   * @todo: Fix the description.
    */
   public function assertFieldOverrideConstraint($bundle) {
-    $user = $this->createUser();
     // Check that a random title can be applied in an entity.
     /** @var \Drupal\Core\Entity\EntityInterface $base_field_entity_1 */
     $base_field_entity_1 = $this->storage->create([
       'type' => $bundle,
       'name' => $this->randomTitle,
-      'user' => $user->id(),
     ]);
     /** @var \Drupal\Core\Field\FieldDefinitionInterface $dataDefinition */
     $dataDefinition = $this->entityManager->getFieldDefinitions('entity_test_field_override', $bundle)['name'];
-    $typed_data = $this->typedData->create($dataDefinition->getItemDefinition(), $base_field_entity_1->getEntityTypeId(), null, $base_field_entity_1->getTypedData());
+    $typed_data = $this->typedData->create($dataDefinition->getItemDefinition(), $base_field_entity_1->getEntityTypeId(), NULL, $base_field_entity_1->getTypedData());
     $violations = $typed_data->validate();
     $this->assertEqual($violations->count(), 0, 'Validation passed for the first time the title is used.');
     $base_field_entity_1->save();
@@ -87,10 +114,11 @@ class EntityConstraintUniqueFieldInBundleTest extends EntityKernelTestBase {
     ]);
     /** @var \Drupal\Core\Field\FieldDefinitionInterface $dataDefinition */
     $dataDefinition = $this->entityManager->getFieldDefinitions('entity_test_field_override', $bundle)['name'];
-    $typed_data = $this->typedData->create($dataDefinition->getItemDefinition(), $base_field_entity_1->getEntityTypeId(), null, $base_field_entity_1->getTypedData());
+    $typed_data = $this->typedData->create($dataDefinition->getItemDefinition(), $base_field_entity_1->getEntityTypeId(), NULL, $base_field_entity_1->getTypedData());
     $violations = $typed_data->validate();
     $this->assertEqual($violations->count(), 1, 'Validation failed for the same entity.');
     $base_field_entity_2->save();
 
   }
+
 }
