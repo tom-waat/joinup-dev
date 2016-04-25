@@ -1,0 +1,5 @@
+name: Joinup extras
+type: module
+description: Provide extra functionality like validators.
+core: 8.x
+package: Custom
