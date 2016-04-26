@@ -1,0 +1,5 @@
+name: Joinup test entity
+type: module
+description: Provide an extra entity that overrides the EntityTestFieldOverride entity.
+core: 8.x
+package: Custom

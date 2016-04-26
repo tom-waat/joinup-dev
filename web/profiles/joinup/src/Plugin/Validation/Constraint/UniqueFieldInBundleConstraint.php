@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\joinup_extras\Plugin\Validation\Constraint;
+namespace Drupal\joinup\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraint;
 
@@ -13,6 +13,7 @@ use Symfony\Component\Validator\Constraint;
  * @Constraint(
  *   id = "UniqueFieldInBundle",
  *   label = @Translation("Unique field within a bundle constraint", context = "Validation"),
+ *   type = "string",
  * )
  */
 class UniqueFieldInBundleConstraint extends Constraint {
@@ -23,7 +24,7 @@ class UniqueFieldInBundleConstraint extends Constraint {
    * {@inheritdoc}
    */
   public function validatedBy() {
-    return '\Drupal\joinup_extras\Plugin\Validation\Constraint\UniqueFieldValueInBundleValidator';
+    return '\Drupal\joinup\Plugin\Validation\Constraint\UniqueFieldValueInBundleValidator';
   }
 
   /**
