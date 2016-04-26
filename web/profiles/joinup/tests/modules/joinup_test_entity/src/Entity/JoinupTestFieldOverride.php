@@ -27,7 +27,6 @@ class JoinupTestFieldOverride extends EntityTest {
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     /** @var \Drupal\Core\Field\FieldDefinitionInterface[] $fields */
     $fields = parent::baseFieldDefinitions($entity_type);
-    $fields['name']->setDescription('The default description.');
     $fields['name']->addConstraint('UniqueFieldInBundle', ['bundles' => ['joinup_test_field_override']]);
 
     return $fields;
@@ -41,7 +40,6 @@ class JoinupTestFieldOverride extends EntityTest {
     /** @var \Drupal\Core\Field\FieldDefinitionInterface[] $fields */
     if ($bundle == 'joinup_dummy_bundle') {
       $fields['name'] = clone $base_field_definitions['name'];
-      $fields['name']->setDescription('Some other description.');
       $fields['name']->addConstraint('UniqueFieldInBundle', ['bundles' => [$bundle]]);
     }
     return $fields;

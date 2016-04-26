@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\joinup\Plugin\Validation\Constraint;
+namespace Drupal\joinup_core\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraint;
 
@@ -24,7 +24,7 @@ class UniqueFieldInBundleConstraint extends Constraint {
    * {@inheritdoc}
    */
   public function validatedBy() {
-    return '\Drupal\joinup\Plugin\Validation\Constraint\UniqueFieldValueInBundleValidator';
+    return '\Drupal\joinup_core\Plugin\Validation\Constraint\UniqueFieldValueInBundleValidator';
   }
 
   /**

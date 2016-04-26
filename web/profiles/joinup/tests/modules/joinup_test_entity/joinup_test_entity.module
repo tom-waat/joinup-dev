@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * @file
+ * Contains joinup_test_entity.module.
+ */
+
+/**
+ * Implements hook_entity_bundle_info().
+ */
+function joinup_test_entity_entity_bundle_info() {
+  $bundles['joinup_test_field_override']['joinup_dummy_bundle']['label'] = 'My awesome bundle';
+  return $bundles;
+}

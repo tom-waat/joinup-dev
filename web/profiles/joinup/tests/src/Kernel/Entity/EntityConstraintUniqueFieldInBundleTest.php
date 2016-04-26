@@ -2,11 +2,10 @@
 
 namespace Drupal\Tests\joinup\Kernel\Entity;
 
-use Drupal\joinup_test_entity\Entity\JoinupTestFieldOverride;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
 /**
- * Tests entity reference selection plugins.
+ * Tests the UniqueFieldInBundle constraint.
  *
  * @group joinup
  */
@@ -24,6 +23,7 @@ class EntityConstraintUniqueFieldInBundleTest extends EntityKernelTestBase {
     'text',
     'filter',
     'joinup_test_entity',
+    'joinup_core',
   ];
 
   /**
@@ -52,27 +52,26 @@ class EntityConstraintUniqueFieldInBundleTest extends EntityKernelTestBase {
    */
   protected function setUp() {
     parent::setUp();
-    /** @var \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler */
-    $moduleHandler = $this->container->get('module_handler');
-    $moduleHandler->addProfile('joinup', 'profiles/joinup');
-    $moduleHandler->loadInclude('joinup', 'php', 'src/Plugin/Validation/Constraint/UniqueFieldInBundleConstraint');
-    $moduleHandler->buildModuleDependencies(['joinup' => $moduleHandler->getModule('joinup')]);
-    /** @var ConstraintManager $validationManager */
-    $validationManager = $this->container->get('validation.constraint');
-    $validationManager->registerDefinitions();
-    $validationManager->clearCachedDefinitions();
-
-    $test = $validationManager->getDefinitionsByType('string');
-
     $this->installEntitySchema('joinup_test_field_override');
-
-    JoinupTestFieldOverride::create(['type' => 'joinup_dummy_bundle'])->save();
-    $this->entityManager->clearCachedBundles();
     $this->storage = $this->entityManager->getStorage('joinup_test_field_override');
     $this->typedData = $this->container->get('typed_data_manager');
+  }
 
+  /**
+   * Tests the actual entity functionality.
+   *
+   * The method assertFieldOverrideConstraint is called twice because
+   * the entity is actually saved to the database in order to check that
+   * there are no validation errors when trying to save the field for the
+   * second bundle.
+   */
+  public function testFieldOverrideConstraint() {
     // Get a random title for the test.
     $this->randomTitle = $this->randomMachineName();
+    // Test for bundle entity_test_field_override.
+    $this->assertFieldOverrideConstraint('joinup_test_field_override');
+    // Test for bundle some_test_bundle.
+    $this->assertFieldOverrideConstraint('joinup_dummy_bundle');
   }
 
   /**
@@ -89,35 +88,28 @@ class EntityConstraintUniqueFieldInBundleTest extends EntityKernelTestBase {
   }
 
   /**
-   * Tests the actual entity functionality.
-   *
-   * @todo: Fix description.
-   */
-  public function testFieldOverrideConstraint() {
-    // Test for bundle entity_test_field_override.
-    $this->assertFieldOverrideConstraint('joinup_test_field_override');
-    // Test for bundle some_test_bundle.
-    $this->assertFieldOverrideConstraint('joinup_dummy_bundle');
-  }
-
-  /**
    * The actual testing.
+   *
+   * In this method we are checking that the first entity succeeds in
+   * passing the validation and getting saved to the database and the second
+   * fails due to duplicate field value.
    *
    * @param string $bundle
    *   A bundle name.
-   *
-   * @todo: Fix the description.
    */
   public function assertFieldOverrideConstraint($bundle) {
+    $user = $this->createUser();
+
     // Check that a random title can be applied in an entity.
     /** @var \Drupal\Core\Entity\EntityInterface $base_field_entity_1 */
     $entity_1 = $this->storage->create([
+      'uid' => $user->id(),
       'type' => $bundle,
       'name' => $this->randomTitle,
     ]);
 
     $violations = $entity_1->getTypedData()->validate();
-    $this->assertEqual($violations->count(), 0, "Validation passed for the first time the title is used in the bundle $bundle.");
+    $this->assertFalse($violations->count(), "Validation passed for the first time the title is used in the bundle $bundle.");
     $entity_1->save();
 
     // Check that a random title cannot be applied at the same bundle.
@@ -128,8 +120,13 @@ class EntityConstraintUniqueFieldInBundleTest extends EntityKernelTestBase {
     ]);
 
     $violations = $entity_2->getTypedData()->validate();
-    $this->assertEqual($violations->count(), 0, "Validation failed for the second time the title is used in the bundle $bundle.");
-    $entity_2->save();
+    $this->assertTrue($violations->count(), "Validation failed for the second time the title is used in the bundle $bundle.");
+    $violation = $violations[0];
+    $this->assertEqual($violation->getMessage(), t('Content with @field_name %value already exists.', [
+      '@field_name' => 'name',
+      '%value' => $this->randomTitle,
+    ]), 'The message for invalid value is correct.');
+
   }
 
 }
