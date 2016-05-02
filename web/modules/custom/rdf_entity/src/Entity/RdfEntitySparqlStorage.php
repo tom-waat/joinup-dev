@@ -14,12 +14,22 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\rdf_entity\Database\Driver\sparql\Connection;
+use Drupal\rdf_entity\Entity\Query\Sparql\SparqlArg;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a entity storage backend that uses a Sparql endpoint.
  */
 class RdfEntitySparqlStorage extends ContentEntityStorageBase {
+
+  /** @var \Drupal\rdf_entity\Database\Driver\sparql\Connection */
+  protected $sparql;
+
+  /** @var \Drupal\Core\Language\LanguageManagerInterface */
+  protected $languageManager;
+
+  /** @var \Drupal\Core\Entity\EntityTypeManagerInterface */
+  protected $entityTypeManager;
 
   /**
    * Initialize the storage backend.
@@ -51,7 +61,7 @@ class RdfEntitySparqlStorage extends ContentEntityStorageBase {
   public function doLoadMultiple(array $ids = NULL) {
     // Attempt to load entities from the persistent cache. This will remove IDs
     // that were loaded from $ids.
-    $entities_from_cache = $this->getFromPersistentCache($ids);
+    $entities_from_cache = [];// $this->getFromPersistentCache($ids);
     // Load any remaining entities from the database.
     if ($entities_from_storage = $this->getFromStorage($ids)) {
       $this->invokeStorageLoadHook($entities_from_storage);
@@ -79,6 +89,7 @@ class RdfEntitySparqlStorage extends ContentEntityStorageBase {
     $entities = array();
     $values = array();
     $bundles = $this->getBundlesByIds($ids);
+    \Drupal::moduleHandler()->alter('rdf_entity_bundle', $bundles);
     foreach ($ids as $id) {
       if (!isset($bundles[$id])) {
         // This entity doesn't have a corresponding bundle.
@@ -132,15 +143,12 @@ class RdfEntitySparqlStorage extends ContentEntityStorageBase {
     if (empty($bundle_mapping)) {
       return;
     }
-    if (!$bundles) {
-      $bundles = array_values($bundle_mapping);
-    }
     $rdf_bundels = [];
     $bundle_mapping = array_flip($bundle_mapping);
     foreach ($bundles as $bundle) {
       $rdf_bundels[] = $bundle_mapping[$bundle];
     }
-    return "(<" . implode(">, <", $rdf_bundels) . ">)";
+    return new SparqlArg($rdf_bundels);
   }
 
   /**

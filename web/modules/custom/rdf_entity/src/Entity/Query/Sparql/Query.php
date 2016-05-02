@@ -7,13 +7,22 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Query\QueryBase;
 use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Entity\Query\Sql\ConditionAggregate;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\rdf_entity\Database\Driver\sparql\Connection;
 
 /**
  * The base entity query class for Rdf entities.
  */
 class Query extends QueryBase implements QueryInterface {
+  protected $defaultGraph = NULL;
+
   protected $sortQuery = NULL;
+
+  /** @var null Set to the entity id when explicit filtering on id. */
+  protected $entity_id = NULL;
+
+  /** @var \Drupal\rdf_entity\Entity\Query\Sparql\SparqlArg List of bundles */
+  protected $bundles = NULL;
 
   public $query = '';
 
@@ -25,6 +34,9 @@ class Query extends QueryBase implements QueryInterface {
   protected $filter;
 
   protected $results = NULL;
+
+  /** @var \Drupal\rdf_entity\Entity\RdfEntitySparqlStorage $entityStorage */
+  protected $entityStorage;
 
   /**
    * Constructs a query object.
@@ -43,6 +55,17 @@ class Query extends QueryBase implements QueryInterface {
     parent::__construct($entity_type, $conjunction, $namespaces);
     $this->filter = new SparqlFilter();
     $this->connection = $connection;
+    // @todo rename graph to a proper uri.
+    $this->defaultGraph = new SparqlArg('http://localhost:8890/DAV', SparqlArg::URI);
+
+    // @todo Inject properly...
+
+    $this->entityStorage = \Drupal::service('entity.manager')
+      ->getStorage('rdf_entity');
+  }
+
+  public function setDefaultGraph($uri) {
+    $this->defaultGraph = new SparqlArg($uri);
   }
 
   /**
@@ -94,8 +117,30 @@ class Query extends QueryBase implements QueryInterface {
    * @return $this
    */
   protected function addConditions() {
+    if ($this->defaultGraph) {
+      $this->query .= 'FROM ' . $this->defaultGraph . "\n";
+    }
     $this->query .=
       "WHERE{\n";
+    // Handling of base properties.
+    // Entity id.
+    $entity_arg = '?entity';
+    if ($this->entity_id) {
+      $entity_arg = SparqlArg::uri($this->entity_id);
+    }
+    if (!$this->bundles) {
+      $this->condition->condition($entity_arg, 'rdf:type', '?type');
+    }
+    elseif ($this->bundles->getType() == SparqlArg::URI) {
+      $this->condition->condition($entity_arg, 'rdf:type', $this->bundles);
+    }
+    elseif ($this->bundles->getType() == SparqlArg::URI_LIST) {
+      $this->condition->condition($entity_arg, 'rdf:type', '?type');
+      $this->filter->filter('?entity IN ' . $this->bundles);
+    }
+    else {
+      throw new \Exception('Bundle should be either a uri or a list of uris.');
+    }
     $this->condition->compile($this);
     $this->filter->compile($this);
     $this->query .= "}\n";
@@ -111,50 +156,72 @@ class Query extends QueryBase implements QueryInterface {
     return $this;
   }
 
+  function condition_value($field_rdf_name, $value) {
+    switch ($field_rdf_name) {
+      // Bundle types are passed in as Drupal entity types and need conversion.
+      case 'rdf:type':
+        if (is_array($value)) {
+          $bundles = $this->entityStorage->getRdfBundleList($value);
+        }
+        else {
+          
+        }
+        var_dump($bundles);
+        var_dump($value);
+
+    }
+    return $value;
+  }
+
   /**
    * {@inheritdoc}
    */
-  public function condition($property, $value = NULL, $operator = '=', $langcode = NULL) {
-    $key = $property . '-' . $operator;
-    // @todo Getting the storage container here looks wrong...
-    $entity_storage = \Drupal::service('entity.manager')
-      ->getStorage('rdf_entity');
-    $field_storage_definitions = \Drupal::service('entity.manager')
-      ->getFieldStorageDefinitions('rdf_entity');
+  public function condition($field, $value = NULL, $operator = '=', $langcode = NULL) {
+    $field_rdf_name = $this->predicateFromField($field);
+    $value = $this->condition_value($field_rdf_name, $value);
+    $value = new SparqlArg($value);
+    /** @todo Get rid of org_value */
+    $org_value = $value;
+
+
+
+    $key = $field . '-' . $operator;
+
     /*
      * Ok, so what is all this:
      * We need to convert our conditions into some sparql compatible conditions.
      */
     switch ($key) {
-      case 'rid-IN':
-        $rdf_bundles = $entity_storage->getRdfBundleList($value);
-        if ($rdf_bundles) {
-          $this->condition->condition('?entity', 'rdf:type', '?type');
-          $this->filter->filter('?type IN ' . $rdf_bundles);
-        }
-        return $this;
+//      case 'rid-IN':
+//        $rdf_bundles = $entity_storage->getRdfBundleList($org_value);
+//        if ($rdf_bundles) {
+//          $this->condition->condition('?entity', 'rdf:type', '?type');
+//          $this->filter->filter('?type IN ' . $rdf_bundles);
+//        }
+//        return $this;
 
-      case 'rid-=':
-        $mapping = $entity_storage->getRdfBundleMapping();
-        $mapping = array_flip($mapping);
-        $bundle = $mapping[$value];
-        if ($bundle) {
-          $this->condition->condition('?entity', 'rdf:type', SparqlArg::uri($bundle));
-        }
-        return $this;
+//      case 'rid-=':
+//        $mapping = $entity_storage->getRdfBundleMapping();
+//        $mapping = array_flip($mapping);
+//        $bundle = $mapping[$value];
+//        if ($bundle) {
+//          $this->condition->condition('?entity', 'rdf:type', SparqlArg::uri($bundle));
+//        }
+//        return $this;
 
       case 'id-IN':
         if ($value) {
-          $ids_list = "(<" . implode(">, <", $value) . ">)";
-          $this->filter->filter('?entity IN ' . $ids_list);
+          if ($value->getType() != SparqlArg::URI_LIST) {
+            throw new \Exception('Trying to run an IN query on a non-list.');
+          }
+          $this->filter->filter('?entity IN (' . $value . ')');
         }
         return $this;
 
       case 'id-NOT IN':
       case 'id-<>':
         if ($value) {
-          $ids_list = "(<" . implode(">, <", $value) . ">)";
-          $this->filter->filter('!(?entity IN ' . $ids_list . ')');
+          $this->filter->filter('!(?entity IN ' . $value . ')');
         }
         return $this;
 
@@ -162,9 +229,9 @@ class Query extends QueryBase implements QueryInterface {
         if (!$value) {
           return $this;
         }
-        $id = '<' . $value . '>';
+        // @todo $this->entity_id = $value
         $this->condition->condition('?entity', 'rdf:type', '?type');
-        $this->filter->filter('?entity IN ' . SparqlArg::literal($id));
+        $this->filter->filter('?entity IN ' . $value);
         break;
 
       case 'label-=':
@@ -180,7 +247,7 @@ class Query extends QueryBase implements QueryInterface {
             $this->filter->filter('?entity IN ' . $ids);
           }
           else {
-            $mapping = $entity_storage->getLabelMapping();
+            $mapping = $this->entityStorage->getLabelMapping();
             $label_list = "(<" . implode(">, <", array_unique(array_values($mapping))) . ">)";
             $this->condition->condition('?entity', '?label_type', '?label');
             $this->filter->filter('?label_type IN ' . $label_list);
@@ -191,7 +258,7 @@ class Query extends QueryBase implements QueryInterface {
         return $this;
 
       case 'label-CONTAINS':
-        $mapping = $entity_storage->getLabelMapping();
+        $mapping = $this->entityStorage->getLabelMapping();
         $label_list = "(<" . implode(">, <", array_unique(array_values($mapping))) . ">)";
         $this->condition->condition('?entity', '?label_type', '?label');
         $this->filter->filter('?label_type IN ' . $label_list);
@@ -200,10 +267,9 @@ class Query extends QueryBase implements QueryInterface {
         }
         return $this;
 
+      // @TODO This looks wrong. Abusing the field name for other logic?
       case '_field_exists-EXISTS':
       case '_field_exists-NOT EXISTS':
-        $field_rdf_name = $this->getFieldRdfPropertyName($value, $field_storage_definitions);
-
         if (!filter_var($field_rdf_name, FILTER_VALIDATE_URL) === FALSE) {
           $field_rdf_name = SparqlArg::uri($field_rdf_name);
         }
@@ -217,31 +283,64 @@ class Query extends QueryBase implements QueryInterface {
       if (!$value) {
         return $this;
       }
-
-      list ($field_name, $column) = explode('.', $property);
-
-      if (empty($field_storage_definitions[$field_name])) {
-        throw new \Exception('Unknown field ' . $field_name);
-      }
-      /** @var \Drupal\field\Entity\FieldStorageConfig $field_storage */
-      $field_storage = $field_storage_definitions[$field_name];
-      if (empty($column)) {
-        $column = $field_storage->getMainPropertyName();
-      }
-      $field_rdf_name = $field_storage->getThirdPartySetting('rdf_entity', 'mapping_' . $column, FALSE);
-      if (empty($field_rdf_name)) {
-        throw new \Exception('No 3rd party field settings for ' . $field_name);
-      }
-      if (UrlHelper::isValid($value, TRUE)) {
-        $value = SparqlArg::uri($value);
-      }
-      else {
-        $value = SparqlArg::literal($value);
-      }
       $this->condition->condition('?entity', SparqlArg::uri($field_rdf_name), $value);
     }
 
     return $this;
+  }
+
+  /**
+   * Get the RDF property corresponding to a given property (field).
+   *
+   * @param string $field
+   *    A field name (with possible property, e.g. field_body.format)
+   * @return mixed|null
+   *    An RDF predicate.
+   * @throws \Exception
+   */
+  protected function predicateFromField($field) {
+    // @todo Get from injected manager.
+    $field_storage_definitions = \Drupal::service('entity.manager')
+      ->getFieldStorageDefinitions('rdf_entity');
+    $property_parts = explode('.', $field);
+    $field_name = $property_parts[0];
+    $column = NULL;
+    if (isset($property_parts[1])) {
+      $column = $property_parts[1];
+    }
+
+    if (empty($field_storage_definitions[$field_name])) {
+      throw new \Exception('Unknown field ' . $field_name);
+    }
+    /** @var \Drupal\field\Entity\FieldStorageConfig $field_storage */
+    $field_storage = $field_storage_definitions[$field_name];
+    if (empty($column)) {
+      $column = $field_storage->getMainPropertyName();
+    }
+    if ($field_storage instanceof BaseFieldDefinition) {
+      return $this->predicateFromBaseField($field);
+      // var_dump($field_storage);
+      // $field_rdf_name = $field_storage->getThirdPartySetting('rdf_entity', 'mapping_' . $column, FALSE);
+      //die();
+    }
+    else {
+      //var_dump($field_storage); die();
+      $field_rdf_name = $field_storage->getThirdPartySetting('rdf_entity', 'mapping_' . $column, FALSE);
+    }
+
+    if (empty($field_rdf_name)) {
+      throw new \Exception('No 3rd party field settings for ' . $field_name);
+    }
+    return $field_rdf_name;
+  }
+
+  function predicateFromBaseField($field) {
+    switch ($field) {
+      case 'rid':
+        return 'rdf:type';
+      default:
+        throw new \Exception('Unimplemented base field' . $field);
+    }
   }
 
   /**
