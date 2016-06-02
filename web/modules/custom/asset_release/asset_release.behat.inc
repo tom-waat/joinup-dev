@@ -49,12 +49,12 @@ class AssetReleaseSubContext extends DrupalSubContextBase implements DrupalSubCo
    *
    * Table format:
    * @codingStandardsIgnoreStart
-   * title             | description                 | documentation | release number | release notes | creation date    | modification date |
-   * Foo asset_release | This is a foo asset release | text.pdf      | 1              | Notes 1       | 28-01-1995 12:05 |                   |
-   * Bar asset_release | This is a bar asset release | text.pdf      | 2.3            | Notes 2       | 28-01-1995 12:06 |                   |
+   * title             | documentation | release number | release notes | creation date    | modification date |
+   * Foo asset_release | text.pdf      | 1              | Notes 1       | 28-01-1995 12:05 |                   |
+   * Bar asset_release | text.pdf      | 2.3            | Notes 2       | 28-01-1995 12:06 |                   |
    * @codingStandardsIgnoreEnd
    *
-   * Fields title, description, release number and release notes are required.
+   * Fields title, release number and release notes are required.
    *
    * @param TableNode $asset_release_table
    *   The asset_release data.
@@ -90,7 +90,6 @@ class AssetReleaseSubContext extends DrupalSubContextBase implements DrupalSubCo
    *
    * Table format:
    * | title             | Sample asset_release                    |
-   * | description       | A sample asset_release                  |
    * | documentation     | text.pdf                                |
    * | is version of     | Solution                                |
    * | release number    | 1                                       |
@@ -98,7 +97,7 @@ class AssetReleaseSubContext extends DrupalSubContextBase implements DrupalSubCo
    * | keywords          | key1, key2                              |
    * ...
    *
-   * Fields title, description, release number and release notes required.
+   * Fields title, release number and release notes required.
    *
    * @param TableNode $asset_release_table
    *   The asset_release data.
@@ -235,7 +234,7 @@ class AssetReleaseSubContext extends DrupalSubContextBase implements DrupalSubCo
       'documentation' => 'field_isr_documentation',
       'included asset' => 'field_isr_included_asset',
       'is version of' => 'field_isr_is_version_of',
-      'keywords' => 'field_isr_keywords',
+      'keywords' => 'field_keywords',
       'language' => 'field_isr_language',
       'modification date' => 'field_isr_modification_date',
       'owner' => 'field_isr_owner',
@@ -243,9 +242,9 @@ class AssetReleaseSubContext extends DrupalSubContextBase implements DrupalSubCo
       'release notes' => 'field_isr_release_notes',
       'related solutions' => 'field_isr_related_solutions',
       'solution type' => 'field_isr_solution_type',
-      'spacial coverage' => 'field_isr_spacial_coverage',
-      'status' => 'field_isr_status',
-      'topic' => 'field_isr_topic',
+      'spacial coverage' => 'field_spacial_coverage',
+      'status' => 'field_status',
+      'topic' => 'field_topic',
       'translation' => 'field_isr_translation',
     ];
   }
