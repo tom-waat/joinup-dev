@@ -1364,6 +1364,9 @@
                 }
             },
             "notification-url": "https://packagist.drupal-composer.org/downloads/",
+            "license": [
+                "GPL-2.0+"
+            ],
             "description": "Redirect anonymous users from 403 Access Denied pages to the /user/login page.",
             "homepage": "https://www.drupal.org/project/r4032login",
             "time": "2016-03-01 13:56:38"
@@ -1379,7 +1382,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://ftp.drupal.org/files/projects/search_api-8.x-1.0-alpha15.zip",
-                "reference": null,
+                "reference": "f8f3ce33a9f608aa830688767fd5ffbd108eb889",
                 "shasum": null
             },
             "require": {
@@ -1588,16 +1591,16 @@
         },
         {
             "name": "ec-europa/infra",
-            "version": "0.5",
+            "version": "0.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ec-europa/infra.git",
-                "reference": "e222fdc0c470102cd1bc2c0b67eec8361e62ca5f"
+                "reference": "7d5e5173e79843ca4b86bddd2f67b8b37dac7776"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ec-europa/infra/zipball/e222fdc0c470102cd1bc2c0b67eec8361e62ca5f",
-                "reference": "e222fdc0c470102cd1bc2c0b67eec8361e62ca5f",
+                "url": "https://api.github.com/repos/ec-europa/infra/zipball/7d5e5173e79843ca4b86bddd2f67b8b37dac7776",
+                "reference": "7d5e5173e79843ca4b86bddd2f67b8b37dac7776",
                 "shasum": ""
             },
             "require": {
@@ -1616,7 +1619,7 @@
                     "email": "gregory@siwhine.net"
                 }
             ],
-            "time": "2016-05-20 14:55:08"
+            "time": "2016-06-02 09:38:35"
         },
         {
             "name": "egulias/email-validator",
@@ -2343,7 +2346,7 @@
             ],
             "authors": [
                 {
-                    "name": "Padraic Brady",
+                    "name": "Pádraic Brady",
                     "email": "padraic.brady@gmail.com",
                     "homepage": "http://blog.astrumfutura.com"
                 }
@@ -5698,6 +5701,9 @@
                 }
             },
             "notification-url": "https://packagist.drupal-composer.org/downloads/",
+            "license": [
+                "GPL-2.0+"
+            ],
             "description": "Provides basic revert and update functionality for other modules",
             "homepage": "https://www.drupal.org/project/config_update",
             "time": "2016-03-01 16:28:35"
@@ -6039,7 +6045,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jcalderonzumba/MinkPhantomJSDriver/zipball/f6867c5e5ad1727936b5e70075d92c2ec060e1a1",
+                "url": "https://api.github.com/repos/jcalderonzumba/MinkPhantomJSDriver/zipball/10d7c48c9a4129463052321b52450d98983c4332",
                 "reference": "10d7c48c9a4129463052321b52450d98983c4332",
                 "shasum": ""
             },
