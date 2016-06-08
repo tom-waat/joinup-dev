@@ -33,12 +33,9 @@ transitions:
         - moderator
         - rdf_entity-collection-member
     proposed:
-      draft:
-        - moderator
-        - rdf_entity-collection-member
       proposed:
         - moderator
-        - rdf_entity-collection-member
+        - rdf_entity-collection-facilitator
       validated:
         - moderator
         - rdf_entity-collection-member
@@ -54,7 +51,7 @@ transitions:
         - rdf_entity-collection-member
       validated:
         - moderator
-        - rdf_entity-collection-member
+        - rdf_entity-collection-facilitator
     in_assessment:
       validated:
         - moderator
@@ -72,13 +69,13 @@ transitions:
         - rdf_entity-collection-member
       proposed:
         - moderator
-        - rdf_entity-collection-member
+        - rdf_entity-collection-facilitator
       validated:
         - moderator
-        - rdf_entity-collection-member
+        - rdf_entity-collection-facilitator
       in_assessment:
         - moderator
-        - rdf_entity-collection-member
+        - rdf_entity-collection-facilitator
     validated:
       draft:
         - moderator
@@ -89,6 +86,9 @@ transitions:
       validated:
         - moderator
         - rdf_entity-collection-facilitator
+      deletion_request:
+        - moderator
+        - rdf_entity-collection-facilitator
     in_assessment:
       validated:
         - moderator
@@ -96,4 +96,4 @@ transitions:
     deletion_request:
       validated:
         - moderator
-        - rdf_entity-collection-administrator
+        - rdf_entity-collection-member

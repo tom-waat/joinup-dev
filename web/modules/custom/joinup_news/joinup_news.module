@@ -40,6 +40,7 @@ function joinup_news_node_access(NodeInterface $node, $op, AccountInterface $acc
 
   $allowed_transitions = $node->get('field_news_state')->first()->getTransitions();
   if (empty($allowed_transitions)) {
+    // @todo: Add also cacheability per user permission.
     return AccessResult::forbidden()->addCacheableDependency($node);
   }
   return AccessResult::neutral();

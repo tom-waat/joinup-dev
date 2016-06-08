@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\joinup\Traits;
+
 use Drupal\node\Entity\Node;
 
 /**

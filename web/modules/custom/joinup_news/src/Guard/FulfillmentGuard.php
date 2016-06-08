@@ -36,6 +36,7 @@ class FulfillmentGuard implements GuardInterface {
    */
   public function allowed(WorkflowTransition $transition, WorkflowInterface $workflow, EntityInterface $entity) {
     $from_state = $entity->field_news_state->first()->value;
+
     $parent = $this->getParent($entity);
 
     $is_moderated = self::MODERATED;
