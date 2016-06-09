@@ -6,6 +6,8 @@
  */
 
 use \Drupal\Core\Entity\EntityTypeInterface;
+use \Drupal\Core\Entity\EntityInterface;
+use \Drupal\Core\Form\FormStateInterface;
 use \Drupal\node\NodeInterface;
 use \Drupal\Core\Session\AccountInterface;
 use \Drupal\Core\Access\AccessResult;
@@ -33,7 +35,7 @@ function joinup_news_entity_bundle_field_info_alter(&$fields, EntityTypeInterfac
  * granted if there are no transitions allowed for the current state of the
  * node.
  */
-function joinup_news_node_access(NodeInterface $node, $op, AccountInterface $account) {
+function joinup_news_node_access(EntityInterface $node, $op, AccountInterface $account) {
   if ($op != 'update' || $node->bundle() != 'news') {
     return AccessResult::neutral();
   }
@@ -44,4 +46,48 @@ function joinup_news_node_access(NodeInterface $node, $op, AccountInterface $acc
     return AccessResult::forbidden()->addCacheableDependency($node);
   }
   return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function joinup_news_node_presave(EntityInterface $entity) {
+  if ($entity->bundle() != 'news') {
+    return;
+  }
+
+  $state = $entity->field_news_state->first()->value;
+  if (empty($state)) {
+    return;
+  }
+
+  if (in_array($state, ['draft', 'proposed'])) {
+    $entity->setPublished(FALSE);
+  }
+  elseif (in_array($state, ['validated', 'in_assessment', 'deletion_request'])) {
+    $entity->setPublished(TRUE);
+  }
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter().
+ *
+ * @see \Drupal\state_machine\Plugin\Field\FieldType\StateItem::getAllowedStates
+ */
+function joinup_news_field_widget_form_alter(&$element, FormStateInterface $form_state, $context) {
+  $fieldType = $context['items']->getFieldDefinition()->getType();
+  if ($fieldType != 'state' || empty($form_state->getBuildInfo()['callback_object'])) {
+    return;
+  }
+  $entity = $form_state->getBuildInfo()['callback_object']->getEntity();
+  // We do not apply this check if we are creating an entity.
+  if (!($entity instanceof NodeInterface) || $entity->bundle() != 'news' || $entity->isNew()) {
+    return;
+  }
+
+  $default_value = reset($element['#default_value']);
+  $allowed_transitions = $entity->get('field_news_state')->first()->getTransitions();
+  if (!in_array($default_value, array_keys($allowed_transitions))) {
+    unset($element['#options'][$default_value], $element['#default_value']);
+  }
 }

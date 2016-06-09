@@ -61,9 +61,9 @@ Feature: News moderation.
       | Content  | Specialized in close combat training |
     And I select "Draft" from "State"
     And I press "Save"
-    Then I break
     # Check reference to news page.
     Then I should not see the success message "News <em>Eagle joins the JL</em> has been created."
+    And the "Eagle joins the JL" news content should not be published
    # Test a transition change.
     When I go to the "news" content "Eagle joins the JL" edit screen
     Then I should not see the heading "Access denied"
@@ -72,7 +72,8 @@ Feature: News moderation.
     When I select "Validated" from "State"
     And I press "Save"
     Then I should see the text "Validated"
-  # And the "Eagle joins the JL" news content should be published
+    Then I should not see the success message "News <em>Eagle joins the JL</em> has been updated."
+    And the "Eagle joins the JL" news content should be published
     When I click "Justice League"
     Then I should see the link "Eagle joins the JL"
 
@@ -91,12 +92,13 @@ Feature: News moderation.
     And I select "Proposed" from "State"
     And I press "Save"
       # Check reference to news page.
+    Then I should not see the success message "News <em>Cheetah kills WonderWoman</em> has been created."
     Then I should see the heading "Cheetah kills WonderWoman"
     And the "Cheetah kills WonderWoman" news content should not be published
     And I should see the text "Collection"
     And I should see the text "Legion of Doom"
       # Visit the collection's news entity and press edit
-    And I go to the "news" content "Eagle joins the JL" edit screen
+    And I go to the "news" content "Cheetah kills WonderWoman" edit screen
     Then I should see the heading "Access denied"
       # Edit and publish the news as a facilitator
     When I am logged in as "Metallo"
@@ -112,23 +114,6 @@ Feature: News moderation.
     Then I should see the link "Cheetah kills WonderWoman"
 
 
-  Scenario Outline: Moderators can edit news regardless of their state.
-    Given I am logged in as "Batman"
-    When I visit the "news" content "<title>" edit screen
-    Then I should not see the heading "Access denied"
-    Examples:
-      | title                         |
-      | Creating Justice League       |
-      | Hawkgirl is a spy             |
-      | Hawkgirl helped Green Lantern |
-      | Space cannon fired            |
-      | Eagle to join in season 4     |
-      | Question joined JL            |
-      | Creating Legion of Doom       |
-      | Creating Legion of Doom       |
-      | Stealing from Batman          |
-      | Learn batman's secret         |
-
 
   Scenario Outline: Members can only edit news they own for specific states.
     # Post moderated.
@@ -140,13 +125,18 @@ Feature: News moderation.
     Examples:
       | user          | title                         | options available | options unavailable                              |
       # State: draft, owned by Eagle
-      | Eagle         | Creating Justice League       | Draft, Validated  | Proposed, In Assessment                          |
+      | Eagle         | Creating Justice League       | Draft, Validated  | Proposed, In assessment                          |
       # State: validated, can report
-      | Eagle         | Hawkgirl helped Green Lantern | In Assessment     | Draft, Validated, Proposed                       |
+      | Eagle         | Hawkgirl helped Green Lantern | In assessment     | Draft, Validated, Proposed                       |
       # State: draft, can propose
       | Mirror Master | Creating Legion of Doom       | Propose           | Draft, Validate, In assessment, Request deletion |
       # State: validated, can report
       | Mirror Master | Stealing from Batman          | In assessment     | Draft, Propose, Validate, Request deletion       |
+
+
+
+
+
 
   Scenario Outline: Members cannot edit news they own for specific states.
     Given I am logged in as "<user>"
@@ -191,6 +181,23 @@ Feature: News moderation.
       | Metallo | Learn batman's secret   | Proposed, Validated                                  | Draft, In assessment, Request deletion           |
       | Metallo | Stealing complete       | Proposed                                             | Draft, Request deletion                          |
       | Metallo | Kill the sun            | Validated                                            | Draft, Proposed, In assessment, Request deletion |
+
+  Scenario Outline: Moderators can edit news regardless of their state.
+    Given I am logged in as "Batman"
+    When I visit the "news" content "<title>" edit screen
+    Then I should not see the heading "Access denied"
+    Examples:
+      | title                         |
+      | Creating Justice League       |
+      | Hawkgirl is a spy             |
+      | Hawkgirl helped Green Lantern |
+      | Space cannon fired            |
+      | Eagle to join in season 4     |
+      | Question joined JL            |
+      | Creating Legion of Doom       |
+      | Creating Legion of Doom       |
+      | Stealing from Batman          |
+      | Learn batman's secret         |
 
   Scenario: An entity should be automatically published/un published according to state
     # Regardless of moderation, the entity is published for the states

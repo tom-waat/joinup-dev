@@ -2,6 +2,7 @@
 
 namespace Drupal\joinup_news\Guard;
 
+use Drupal\node\NodeInterface;
 use Drupal\og\Og;
 use Drupal\rdf_entity\Entity\Rdf;
 use Drupal\state_machine\Guard\GuardInterface;
@@ -35,8 +36,7 @@ class FulfillmentGuard implements GuardInterface {
    * roles by the system and the organic groups are checked.
    */
   public function allowed(WorkflowTransition $transition, WorkflowInterface $workflow, EntityInterface $entity) {
-    $from_state = $entity->field_news_state->first()->value;
-
+    $from_state = $this->getState($entity);
     $parent = $this->getParent($entity);
 
     $is_moderated = self::MODERATED;
@@ -46,7 +46,8 @@ class FulfillmentGuard implements GuardInterface {
         $parent->field_is_moderation->first()->value;
     }
     $to_state = $transition->getToState()->getId();
-    $allowed_conditions = \Drupal::config('joinup_news.settings')->get('transitions');
+    $allowed_conditions = \Drupal::config('joinup_news.settings')
+      ->get('transitions');
 
     // Some transitions are not allowed per parent's moderation.
     // Check for the transitions allowed.
@@ -98,6 +99,36 @@ class FulfillmentGuard implements GuardInterface {
       $parent = Rdf::load($entity->field_news_parent->first()->target_id);
     }
     return $parent;
+  }
+
+  /**
+   * Retrieve the initial state value of the entity.
+   *
+   * The state_machine module uses a protected property called initialValue to
+   * get the initial state which is inaccessible. During an entity update, the
+   * typedDataManager attempts to validate the field but the constraint again
+   * calls for the Guard to check the allowed states.
+   * The issue is that the entity object already carries the new value
+   * at this point, so it attempts to check a to_state to to_state transition.
+   * In order to check the initial value, we get the unchanged version of the
+   * object from the database.
+   *
+   * @param \Drupal\node\NodeInterface $entity
+   *    The node entity.
+   *
+   * @return string
+   *    The machine name value of the state.
+   *
+   * @see https://www.drupal.org/node/2745673
+   */
+  protected function getState(NodeInterface $entity) {
+    if ($entity->isNew()) {
+      return $entity->field_news_state->first()->value;
+    }
+    else {
+      $unchanged_entity = \Drupal::entityTypeManager()->getStorage('node')->loadUnchanged($entity->id());
+      return $unchanged_entity->field_news_state->first()->value;
+    }
   }
 
 }
