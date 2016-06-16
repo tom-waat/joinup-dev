@@ -68,7 +68,12 @@ function joinup_theme_preprocess_block(&$variables) {
     $route_match = \Drupal::routeMatch();
     $route_name = $route_match->getRouteName();
 
-    if ($route_name == 'view.collections.page_1') {
+    $entity = $route_match->getParameter('rdf_entity');
+    if (!empty($entity)) {
+      $entity_type = $entity->getType();
+    }
+
+    if ($route_name == 'view.collections.page_1' || (isset($entity_type) && $entity_type == 'collection')) {
       $variables['is_view'] = TRUE;
     }
   }
@@ -81,7 +86,12 @@ function joinup_theme_preprocess_block(&$variables) {
       'user.pass',
     );
 
-    if (!empty($route_name) && in_array($route_name, $blue_header_routes)) {
+    $entity = $route_match->getParameter('rdf_entity');
+    if (!empty($entity)) {
+      $entity_type = $entity->getType();
+    }
+
+    if ((!empty($route_name) && in_array($route_name, $blue_header_routes)) || (isset($entity_type) && $entity_type == 'collection')) {
       $variables['hide_title'] = TRUE;
     }
   }
