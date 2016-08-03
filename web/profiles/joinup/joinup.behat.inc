@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\DrupalExtension\Context\DrupalSubContextBase;
 use Drupal\DrupalExtension\Context\DrupalSubContextInterface;
 use Drupal\DrupalExtension\Hook\Scope\BeforeNodeCreateScope;
+use Drupal\User\Entity\User;
 use Drupal\file\Entity\File;
 use Drupal\joinup\Traits\NodeTrait;
 use Drupal\joinup\Traits\OgTrait;
@@ -88,19 +89,22 @@ class JoinupSubContext extends DrupalSubContextBase implements DrupalSubContextI
     $entity = $this->getRdfEntityByLabel($rdf_entity, $rdf_entity_bunlde);
     $roles = explode(',', $role);
     $roles = array_map('trim', $roles);
-    $roles = $this->convertOgRoleNamesToIds($roles, $entity);
+    $roles = $this->getOgRoles($roles, $entity);
 
     // Check if a user with this role is already logged in.
-    if (!$this->loggedInWithOgRole($roles, $entity)) {
+    if (!$this->loggedInWithOgRoles($roles, $entity)) {
       $random = $this->getRandom()->name(8);
       // Create user (and project)
-      $user = (object) array(
+      $user = (object) [
         'name' => $random,
         'pass' => $random,
-      );
+      ];
       $user->mail = "{$user->name}@example.com";
       $this->userCreate($user);
-      $this->subscribeUserToGroup($user->uid, $entity, $roles);
+
+      // Load the actual user account.
+      $account = User::load($this->user->uid);
+      $this->subscribeUserToGroup($account, $entity, $roles);
 
       // Login.
       $this->login();
@@ -114,7 +118,7 @@ class JoinupSubContext extends DrupalSubContextBase implements DrupalSubContextI
    * from the rest of the roles that will lead the test to a false positive.
    * For this reason, we request check for the specific roles passed.
    *
-   * @param array $roles
+   * @param \Drupal\og\Entity\OgRole[] $roles
    *   An array of roles to check.
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group that is checked if the user has the role.
@@ -124,12 +128,12 @@ class JoinupSubContext extends DrupalSubContextBase implements DrupalSubContextI
    *
    * @see \Drupal\DrupalExtension\Context\RawDrupalContext::loggedInWithRole
    */
-  protected function loggedInWithOgRole(array $roles, EntityInterface $group) {
+  protected function loggedInWithOgRoles(array $roles, EntityInterface $group) {
     if (!$this->loggedIn() || !$this->user) {
       return FALSE;
     }
     $user = \Drupal::entityTypeManager()->getStorage('user')->loadUnchanged($this->user->uid);
-    $membership = Og::getMembership($user, $group);
+    $membership = Og::getMembership($group, $user);
     if (empty($membership)) {
       return FALSE;
     }
@@ -384,7 +388,7 @@ class JoinupSubContext extends DrupalSubContextBase implements DrupalSubContextI
    * This allows us to:
    * - use human readable labels like 'short title' and 'collection' in test
    *   scenarios, and map them to the actual field names like
-   *   'field_document_short_title' and 'og_group_ref'.
+   *   'field_document_short_title' and 'og_audience'.
    * - use human readable values such as a collection name instead of the URL
    *   that is actually used in the OG reference field.
    *
@@ -410,9 +414,9 @@ class JoinupSubContext extends DrupalSubContextBase implements DrupalSubContextI
     // actual URI. Note that this fails if a URI is supplied for a collection or
     // solution in a Behat test. This is by design, the URIs are not exposed to
     // end users of the site so they should not be used in BDD scenarios.
-    if (!empty($node->og_group_ref)) {
-      $entity = $this->getRdfEntityByLabel($node->og_group_ref);
-      $node->og_group_ref = $entity->id();
+    if (!empty($node->og_audience)) {
+      $entity = $this->getRdfEntityByLabel($node->og_audience);
+      $node->og_audience = $entity->id();
     }
   }
 
@@ -441,8 +445,8 @@ class JoinupSubContext extends DrupalSubContextBase implements DrupalSubContextI
         'state' => 'field_news_state',
       ],
       'shared' => [
-        'collection' => 'og_group_ref',
-        'solution' => 'og_group_ref',
+        'collection' => 'og_audience',
+        'solution' => 'og_audience',
       ],
     ];
 
