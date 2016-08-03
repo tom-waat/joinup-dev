@@ -1,0 +1,5 @@
+name: ID awesome module
+type: module
+description: Not to be used or merged in production.
+core: 8.x
+package: IDUAT

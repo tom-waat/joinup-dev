@@ -1,0 +1,84 @@
+<?php
+
+/**
+ * @file
+ * Contains id_awesome_module.module..
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Component\Uuid\Php;
+use Drupal\file\Entity\File;
+
+define('ID_AWESOME_MODULE_FILE_DIRECTORY', drupal_get_path('module', 'id_awesome_module') . '/includes');
+
+/**
+ * Implements hook_entity_prepare_form().
+ *
+ * Randomly fills each required field with a random value. For file fields,
+ * use default objects provided by the module.
+ * The random filling, skips all entity keys except from the label as they
+ * should not be handled within the form.
+ */
+function id_awesome_module_entity_prepare_form(EntityInterface $entity, $operation, FormStateInterface $form_state) {
+  if (!$entity->isNew()) {
+    return;
+  }
+  $uuid = new Php();
+
+  // Fill in label but skip the rest of the entity keys.
+  $keys_to_skip = $entity->getEntityType()->getKeys();
+  unset($keys_to_skip['label']);
+
+  $field_definitions = $entity->getFieldDefinitions();
+  foreach ($field_definitions as $id => $field_definition) {
+    if (in_array($id, $keys_to_skip) || !$field_definition->isRequired()) {
+      continue;
+    }
+
+    switch ($field_definition->getType()) {
+      // Handle textfields.
+      case 'string':
+        $entity->set($id, $uuid->generate());
+        break;
+
+      // Handle text_long.
+      case 'text_long':
+        $entity->set($id, $uuid->generate());
+        break;
+
+      // Handle link.
+      case 'link':
+        $entity->set($id, 'http://' . $uuid->generate() . '.com');
+        break;
+
+      // Handle entity reference.
+      // This will load a random entity of the first available type. If none are
+      // found, then the field will be left empty.
+      case 'entity_reference':
+        $target_entity_type_id = $field_definition->getFieldStorageDefinition()->getTargetEntityTypeId();
+        $target_bundles = $field_definition->getSetting('handler_settings')['target_bundles'];
+        $target_entity_type = \Drupal::entityTypeManager()->getDefinition($target_entity_type_id);
+
+        // Get the first entity of the given settings.
+        $references = \Drupal::entityTypeManager()->getStorage($target_entity_type_id)->getQuery()
+          ->condition($target_entity_type->getKey('bundle'), $target_bundles, 'IN')
+          ->execute();
+
+        if (!empty($references)) {
+          $entity->set($id, [0 => array_pop($references)]);
+        }
+        break;
+
+      case 'image':
+        $files = file_scan_directory(ID_AWESOME_MODULE_FILE_DIRECTORY, '*.*');
+        foreach ($files as $uri => $file) {
+          $file = File::create((array) $file);
+          $entity->set($id, [0 => $file]);
+
+        }
+        break;
+    }
+  }
+
+}
