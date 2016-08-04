@@ -3,7 +3,6 @@
 namespace Drupal\joinup_news\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\og\OgAccess;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\rdf_entity\RdfInterface;
