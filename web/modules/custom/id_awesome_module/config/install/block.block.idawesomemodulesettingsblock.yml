@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - id_awesome_module
+  theme:
+    - joinup_theme
+id: idawesomemodulesettingsblock
+theme: joinup_theme
+region: sidebar_left
+weight: 0
+provider: null
+plugin: id_awesome_module_settings_block
+settings:
+  id: id_awesome_module_settings_block
+  label: 'Auto fill forms'
+  provider: id_awesome_module
+  label_display: visible
+visibility: {  }

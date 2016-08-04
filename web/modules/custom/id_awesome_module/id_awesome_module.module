@@ -9,8 +9,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Component\Uuid\Php;
 
-define('ID_AWESOME_MODULE_FILE_DIRECTORY', drupal_get_path('module', 'id_awesome_module') . '/includes');
-
 /**
  * Implements hook_entity_prepare_form().
  *
@@ -23,19 +21,34 @@ function id_awesome_module_entity_prepare_form(EntityInterface $entity, $operati
   if (!$entity->isNew()) {
     return;
   }
-  $uuid = new Php();
+  $settings = \Drupal::config('id_awesome_module.settings');
 
-  // Fill in label but skip the rest of the entity keys.
+  // If the auto fill is disabled, return.
+  if ($settings->get('activate_auto_fill') == FALSE) {
+    return;
+  }
+
+  // Skip fields handled by core (label will still be filled later on).
   $keys_to_skip = $entity->getEntityType()->getKeys();
-  $entity->set('label', $uuid->generate());
+  $uuid = new Php();
+  $auto_fill_types = $settings->get('fields_to_fill');
+
+  if (in_array('label', $auto_fill_types)) {
+    $entity->set('label', $uuid->generate());
+  }
 
   $field_definitions = $entity->getFieldDefinitions();
   foreach ($field_definitions as $id => $field_definition) {
-    if (in_array($id, $keys_to_skip) || !$field_definition->isRequired()) {
+    if (in_array($id, $keys_to_skip)) {
       continue;
     }
 
-    $entity->{$id}->generateSampleItems();
+    if ($field_definition->isRequired() && in_array('required', $auto_fill_types)) {
+      $entity->{$id}->generateSampleItems();
+    }
+    elseif ((!$field_definition->isRequired()) && in_array('optional', $auto_fill_types)) {
+      $entity->{$id}->generateSampleItems();
+    }
   }
 
 }

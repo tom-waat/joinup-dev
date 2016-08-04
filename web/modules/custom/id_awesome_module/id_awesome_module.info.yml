@@ -3,3 +3,6 @@ type: module
 description: Not to be used or merged in production.
 core: 8.x
 package: IDUAT
+
+config_devel:
+ - block.block.idawesomemodulesettingsblock

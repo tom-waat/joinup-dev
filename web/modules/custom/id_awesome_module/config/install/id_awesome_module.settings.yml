@@ -1,0 +1,4 @@
+fields_to_fill:
+  label: label
+  required: required
+activate_auto_fill: 1
