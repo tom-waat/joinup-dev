@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\id_awesome_module\Form;
+namespace Drupal\form_auto_fill\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Class SettingsForm.
  *
- * @package Drupal\id_awesome_module\Form
+ * @package Drupal\form_auto_fill\Form
  */
 class SettingsForm extends ConfigFormBase {
 
@@ -38,7 +38,7 @@ class SettingsForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return [
-      'id_awesome_module.settings',
+      'form_auto_fill.settings',
     ];
   }
 
@@ -46,14 +46,14 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'id_awesome_module_settings_form';
+    return 'form_auto_fill_settings_form';
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('id_awesome_module.settings');
+    $config = $this->config('form_auto_fill.settings');
     $form['activate_auto_fill'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enabled'),
@@ -90,7 +90,7 @@ class SettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
 
-    $this->config('id_awesome_module.settings')
+    $this->config('form_auto_fill.settings')
       ->set('fields_to_fill', $form_state->getValue('fields_to_fill'))
       ->set('activate_auto_fill', $form_state->getValue('activate_auto_fill'))
       ->save();

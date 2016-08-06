@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains id_awesome_module.module..
+ * Contains form_auto_fill.module..
  */
 
 use Drupal\Core\Form\FormStateInterface;
@@ -17,11 +17,11 @@ use Drupal\Component\Uuid\Php;
  * The random filling, skips all entity keys except from the label as they
  * should not be handled within the form.
  */
-function id_awesome_module_entity_prepare_form(EntityInterface $entity, $operation, FormStateInterface $form_state) {
+function form_auto_fill_entity_prepare_form(EntityInterface $entity, $operation, FormStateInterface $form_state) {
   if (!$entity->isNew()) {
     return;
   }
-  $settings = \Drupal::config('id_awesome_module.settings');
+  $settings = \Drupal::config('form_auto_fill.settings');
 
   // If the auto fill is disabled, return.
   if ($settings->get('activate_auto_fill') == FALSE) {

@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   module:
-    - id_awesome_module
+    - form_auto_fill
   theme:
     - joinup_theme
 id: idawesomemodulesettingsblock
@@ -10,10 +10,10 @@ theme: joinup_theme
 region: sidebar_left
 weight: 0
 provider: null
-plugin: id_awesome_module_settings_block
+plugin: form_auto_fill_settings_block
 settings:
-  id: id_awesome_module_settings_block
+  id: form_auto_fill_settings_block
   label: 'Auto fill forms'
-  provider: id_awesome_module
+  provider: form_auto_fill
   label_display: visible
 visibility: {  }
