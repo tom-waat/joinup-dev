@@ -7,7 +7,6 @@
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Component\Uuid\Php;
 
 /**
  * Implements hook_entity_prepare_form().
@@ -28,13 +27,29 @@ function form_auto_fill_entity_prepare_form(EntityInterface $entity, $operation,
     return;
   }
 
+  if ($settings->get('manual_fill') == FALSE) {
+    form_auto_fill_entity_fill($entity);
+  }
+}
+
+/**
+ * Fills the entity with random values and passes it back to the form state.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *    The entity to be filled.
+ *
+ * @return EntityInterface
+ *    The updated entity.
+ */
+function form_auto_fill_entity_fill(EntityInterface $entity) {
+  $settings = \Drupal::config('form_auto_fill.settings');
+
   // Skip fields handled by core (label will still be filled later on).
   $keys_to_skip = $entity->getEntityType()->getKeys();
-  $uuid = new Php();
   $auto_fill_types = $settings->get('fields_to_fill');
 
   if (in_array('label', $auto_fill_types)) {
-    $entity->set('label', $uuid->generate());
+    $entity->label->generateSampleItems();
   }
 
   $field_definitions = $entity->getFieldDefinitions();
@@ -51,4 +66,5 @@ function form_auto_fill_entity_prepare_form(EntityInterface $entity, $operation,
     }
   }
 
+  return $entity;
 }

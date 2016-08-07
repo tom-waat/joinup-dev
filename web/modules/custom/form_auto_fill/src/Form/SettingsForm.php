@@ -54,15 +54,24 @@ class SettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('form_auto_fill.settings');
+
     $form['activate_auto_fill'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enabled'),
       '#default_value' => $config->get('activate_auto_fill'),
       '#weight' => 0,
     ];
+
+    $form['manual_fill'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Manual fill'),
+      '#default_value' => $config->get('manual_fill'),
+      '#weight' => 1,
+    ];
+
     $form['fields_to_fill'] = [
       '#type' => 'select',
-      '#title' => $this->t('Fields to autofill'),
+      '#title' => $this->t('Fields to auto fill'),
       '#options' => [
         'label' => $this->t('Label'),
         'required' => $this->t('Required'),
@@ -71,7 +80,7 @@ class SettingsForm extends ConfigFormBase {
       '#multiple' => TRUE,
       '#size' => 4,
       '#default_value' => $config->get('fields_to_fill'),
-      '#weight' => 1,
+      '#weight' => 2,
     ];
 
     return parent::buildForm($form, $form_state);
@@ -92,6 +101,7 @@ class SettingsForm extends ConfigFormBase {
 
     $this->config('form_auto_fill.settings')
       ->set('fields_to_fill', $form_state->getValue('fields_to_fill'))
+      ->set('manual_fill', $form_state->getValue('manual_fill'))
       ->set('activate_auto_fill', $form_state->getValue('activate_auto_fill'))
       ->save();
   }

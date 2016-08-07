@@ -5,20 +5,12 @@ form_auto_fill.settings:
     activate_auto_fill:
       type: boolean
       label: 'Auto fill create forms'
+    # This distinguishes the automatic and the manual fill.
+    manual_fill:
+      type: boolean
+      label: 'Manual fill'
     fields_to_fill:
       type: sequence
       label: 'Fields to fill'
       sequence:
         type: string
-form_auto_fill.form_auto_fill.*:
-  type: config_entity
-  label: 'Form auto fill config'
-  mapping:
-    id:
-      type: string
-      label: 'ID'
-    label:
-      type: label
-      label: 'Label'
-    uuid:
-      type: string

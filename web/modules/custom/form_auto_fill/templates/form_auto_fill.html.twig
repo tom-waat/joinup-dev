@@ -1,0 +1,22 @@
+{#
+/**
+ * @file form_auto_fill.html.twig
+ * Default theme implementation to present Form auto fill data.
+ *
+ * This template is used when viewing Form auto fill pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ *
+ * @see template_preprocess_form_auto_fill()
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes.addClass('form_auto_fill') }}>
+  {% if content %}
+    {{- content -}}
+  {% endif %}
+</div>

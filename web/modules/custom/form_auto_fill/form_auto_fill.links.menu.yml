@@ -1,8 +1,0 @@
-# Form auto fill menu items definition
-entity.form_auto_fill.collection:
-  title: 'Form auto fill'
-  route_name: entity.form_auto_fill.collection
-  description: 'List Form auto fill (bundles)'
-  parent: system.admin_structure
-  weight: 99
-
