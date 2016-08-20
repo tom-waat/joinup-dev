@@ -7,7 +7,7 @@ dependencies:
     - joinup_theme
 id: idawesomemodulesettingsblock
 theme: joinup_theme
-region: sidebar_left
+region: content_bottom
 weight: 0
 provider: null
 plugin: form_auto_fill_settings_block
