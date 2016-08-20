@@ -1,0 +1,4 @@
+services:
+  form_auto_fill.form_fill:
+    class: Drupal\form_auto_fill\FormFill
+    arguments: ['@config.factory']
