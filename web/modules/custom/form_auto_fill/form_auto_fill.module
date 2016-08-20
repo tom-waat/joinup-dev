@@ -9,6 +9,7 @@ use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_entity_prepare_form().
@@ -47,7 +48,7 @@ function form_auto_fill_entity_prepare_form(EntityInterface $entity, $operation,
 /**
  * Implements hook_form_alter().
  */
-function form_auto_fill_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+function form_auto_fill_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $form_auto_fill_service = \Drupal::service('form_auto_fill.form_fill');
   if (!$form_auto_fill_service->applies() || !$form_auto_fill_service->isManual() || !($form_state->getBuildInfo()['callback_object'] instanceof ContentEntityForm)) {
     return;
@@ -69,12 +70,15 @@ function form_auto_fill_form_alter(&$form, \Drupal\Core\Form\FormStateInterface 
 
   $form['form_auto_fill_container']['form_auto_fill_description'] = [
     '#type' => 'item',
-    '#value' => t('To change settings for the auto fill, please go to ' . \Drupal\Core\Url::fromRoute('form_auto_fill.form_auto_fill_settings_form')->getUri()),
+    '#value' => t('To change settings for the auto fill, please go to :settings_url.', [':settings_url' => Url::fromRoute('form_auto_fill.form_auto_fill_settings_form')->getUri()]),
     '#access' => \Drupal::currentUser()->hasPermission('administer form auto fill settings'),
   ];
 }
 
-function form_auto_fill_form_alter_submit(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+/**
+ * Submit handler for the form_auto_fill_submit button. Auto fills the entity.
+ */
+function form_auto_fill_form_alter_submit(&$form, FormStateInterface $form_state) {
   $build_info = $form_state->getBuildInfo();
 
   // Re-initialize the service.

@@ -6,6 +6,9 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 
+/**
+ * FormFill service.
+ */
 class FormFill {
 
   /**
@@ -25,7 +28,7 @@ class FormFill {
   /**
    * The entity that the form is about.
    *
-   * @var EntityInterface
+   * @var \Drupal\Core\Entity\EntityInterface
    */
   protected $entity;
 
@@ -48,61 +51,88 @@ class FormFill {
   }
 
   /**
-   * @return boolean
+   * Whether the service applies and the entity is valid for auto fill.
+   *
+   * @return bool
+   *    Whether the service applies.
    */
   public function applies() {
     return $this->isEnabled() && (!empty($this->entity)) && ($this->entity instanceof ContentEntityInterface);
   }
 
   /**
-   * @return boolean
+   * Checks if the auto fill service is enabled.
+   *
+   * @return bool
+   *    Whether the service is enabled.
    */
   public function isEnabled() {
     return $this->config->get('activate_auto_fill');
   }
 
   /**
-   * @return boolean
+   * Checks if the manual fill is activated.
+   *
+   * @return bool
+   *    If true, manual fill is activated, otherwise it is automatic.
    */
   public function isManual() {
     return $this->config->get('manual_fill');
   }
 
   /**
+   * Checks if the service has an entity passed.
+   *
    * @return bool
+   *    Whether the service has an entity.
    */
   public function hasEntity() {
     return !empty($this->entity);
   }
 
   /**
+   * Returns the form ID.
+   *
    * @return string
+   *    The form ID.
    */
   public function getFormId() {
     return $this->formId;
   }
 
   /**
+   * Sets the form ID.
+   *
    * @param string $formId
+   *    The form ID.
    */
   public function setFormId($formId) {
     $this->formId = $formId;
   }
 
   /**
+   * Returns the entity saved in the service.
+   *
    * @return \Drupal\Core\Entity\EntityInterface
+   *    The entity object.
    */
   public function getEntity() {
     return $this->entity;
   }
 
   /**
+   * Sets the entity object to the service.
+   *
    * @param \Drupal\Core\Entity\EntityInterface $entity
+   *    The entity object.
    */
-  public function setEntity($entity) {
+  public function setEntity(EntityInterface $entity) {
     $this->entity = $entity;
   }
 
+  /**
+   * Process the settings to determine whether to fill the entity.
+   */
   public function processEntity() {
     // If the auto fill is disabled, return.
     if ($this->config->get('activate_auto_fill') == FALSE) {
@@ -114,6 +144,11 @@ class FormFill {
     }
   }
 
+  /**
+   * Fills the entity's fields with random values.
+   *
+   * Does not change already existing values.
+   */
   public function fillEntityFields() {
     // Skip fields handled by core (label will still be filled later on).
     $keys_to_skip = $this->entity->getEntityType()->getKeys();
