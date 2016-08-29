@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Enables modules and site configuration for the Joinup profile.
@@ -6,6 +7,7 @@
 
 use \Drupal\Core\Form\FormStateInterface;
 use \Drupal\Core\Database\Database;
+use \Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Implements hook_form_FORMID_alter().
@@ -69,9 +71,12 @@ function joinup_form_install_settings_form_save($form, FormStateInterface $form_
 function joinup_entity_type_alter(array &$entity_types) {
   // Add the "Propose" form operation to nodes and RDF entities so that we can
   // add propose form displays to them.
-  /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
-  $entity_types['rdf_entity']->setFormclass('propose', 'Drupal\rdf_entity\Form\RdfForm');
-  $entity_types['node']->setFormclass('collection_custom_page', 'Drupal\custom_page\Form\CollectionCustomPageForm');
+  // Skip this during installation, since the RDF entity will not yet be
+  // registered.
+  if (!drupal_installation_attempted()) {
+    /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
+    $entity_types['rdf_entity']->setFormclass('propose', 'Drupal\rdf_entity\Form\RdfForm');
+  }
 }
 
 /**
@@ -83,4 +88,86 @@ function joinup_form_field_config_edit_form_alter(&$form) {
   if (isset($form['settings']['file_extensions']['#maxlength'])) {
     $form['settings']['file_extensions']['#maxlength'] = 1024;
   }
+}
+
+/**
+ * Implements hook_rdf_apply_default_fields_alter().
+ *
+ * This profile includes 'content_editor' filter format as a text editor and
+ * access to 'full_html' and the rest of the filter formats are restricted.
+ * With this hook, we make sure that the default fields with type 'text_long'
+ * have the 'content_editor' filter format as default.
+ */
+function joinup_rdf_apply_default_fields_alter(FieldStorageConfig $storage, &$values) {
+  // Since the profile includes a filter format, we provide this as default.
+  if ($storage->getType() == 'text_long') {
+    foreach ($values as &$value) {
+      if ($value['format'] == 'full_html') {
+        $value['format'] = 'content_editor';
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_og_user_access_alter().
+ */
+function joinup_og_user_access_alter(&$permissions, &$cacheable_metadata, $context) {
+  // Moderators should have access to view, create, edit and delete all group
+  // content in collections.
+  /** @var \Drupal\Core\Session\AccountProxyInterface $user */
+  $user = $context['user'];
+  $operation = $context['operation'];
+  $group = $context['group'];
+
+  $is_moderator = in_array('moderator', $user->getRoles());
+  $is_collection = $group->bundle() === 'collection';
+  $operation_allowed = in_array($operation, [
+    'view',
+    'create',
+    'update',
+    'delete',
+  ]);
+
+  if ($is_moderator && $is_collection && $operation_allowed) {
+    $permissions[] = $operation;
+  }
+}
+
+/**
+ * Implements hook_field_widget_inline_entity_form_complex_form_alter().
+ *
+ * Simplifies the widget buttons when only a bundle is configured.
+ */
+function joinup_field_widget_inline_entity_form_complex_form_alter(&$element, FormStateInterface $form_state, $context) {
+  if (isset($element['actions']['bundle']['#type']) && $element['actions']['bundle']['#type'] == 'value') {
+    $buttons = [
+      'ief_add' => t('Add new'),
+      'ief_add_existing' => t('Add existing'),
+    ];
+
+    foreach ($buttons as $key => $label) {
+      if (!empty($element['actions'][$key])) {
+        $element['actions'][$key]['#value'] = $label;
+      }
+    }
+  }
+
+  // If no title is provided for the fieldset wrapping the create form, add the
+  // label of the bundle of the entity being created.
+  if (empty($element['form']['#title']) && !empty($element['form']['inline_entity_form']['#bundle'])) {
+    $entity_type = $element['form']['inline_entity_form']['#entity_type'];
+    $bundle = $element['form']['inline_entity_form']['#bundle'];
+
+    $bundle_info = \Drupal::entityManager()->getBundleInfo($entity_type);
+    $element['form']['#title'] = $bundle_info[$bundle]['label'];
+  }
+}
+
+/**
+ * Implements hook_inline_entity_form_reference_form_alter().
+ */
+function joinup_inline_entity_form_reference_form_alter(&$reference_form, &$form_state) {
+  // Avoid showing two labels one after each other.
+  $reference_form['entity_id']['#title_display'] = 'invisible';
 }

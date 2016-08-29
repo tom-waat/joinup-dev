@@ -6,9 +6,18 @@
  */
 
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\og\Entity\OgMembership;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgRoleInterface;
+use Drupal\og_menu\Entity\OgMenuInstance;
+use Drupal\rdf_entity\Entity\RdfEntityType;
+use Drupal\views\Views;
 
 /**
  * Implements hook_form_FORM_ID_alter().
@@ -20,10 +29,55 @@ function collection_form_block_form_alter(&$form, FormStateInterface $form_state
 }
 
 /**
+ * Implements hook_entity_bundle_field_info_alter().
+ */
+function collection_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
+  // Make sure the collection label is unique.
+  if ($entity_type->id() == 'rdf_entity' && $bundle == 'collection' && !empty($fields['label'])) {
+    $fields['label']->addConstraint('UniqueFieldInBundle', ['bundles' => ['collection']]);
+  }
+}
+
+/**
  * Implements hook_entity_insert().
  */
 function collection_entity_insert(EntityInterface $entity) {
+  if ($entity->bundle() !== 'collection') {
+    return;
+  }
   collection_entity_update($entity);
+
+  // Create a new navigation menu and associate it with the new collection. This
+  // menu can be used to link to custom pages for the collection.
+  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) && $entity->bundle() === 'collection') {
+    $values = [
+      'type' => 'navigation',
+      OgGroupAudienceHelper::DEFAULT_FIELD => $entity->id(),
+    ];
+    $og_menu_instance = OgMenuInstance::create($values);
+    $og_menu_instance->save();
+  }
+
+  // When a new collection is proposed, give the user the 'group owner' role.
+  // This will not occur if the user is the anonymous, i.e. the entity was
+  // created by some batch process or some importing.
+  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) && !\Drupal::currentUser()->isAnonymous()) {
+    // The group owner inherits all roles of a collection member, facilitator
+    // and administrator.
+    $roles = [
+      'rdf_entity-collection-' . OgRoleInterface::AUTHENTICATED,
+      'rdf_entity-collection-' . OgRoleInterface::ADMINISTRATOR,
+      'rdf_entity-collection-facilitator',
+    ];
+
+    /** @var \Drupal\og\OgMembershipInterface $membership */
+    $membership = OgMembership::create();
+    $membership
+      ->setUser(\Drupal::currentUser())
+      ->setGroup($entity)
+      ->setRoles(array_values(OgRole::loadMultiple($roles)))
+      ->save();
+  }
 }
 
 /**
@@ -40,5 +94,73 @@ function collection_entity_update(EntityInterface $entity) {
         Cache::invalidateTags(['og_group_content:' . $id]);
       }
     }
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function collection_module_implements_alter(&$implementations, $hook) {
+  if ($hook === 'entity_insert') {
+    // Make sure collection_entity_insert() runs after og_entity_insert(). The
+    // latter creates an OgMembership entry for the collection owner when a new
+    // collection is proposed, and collection_entity_insert() needs to modify
+    // this membership to add the required OG roles to it.
+    $group = $implementations['collection'];
+    unset($implementations['collection']);
+    $implementations['collection'] = $group;
+  }
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function collection_entity_extra_field_info() {
+  $fields = [];
+  // Create a 'collection content' field, available on the collection display.
+  $collection = RdfEntityType::load('collection');
+  $fields['rdf_entity'][$collection->id()]['display']['collection_content'] = [
+    'label' => t('Collection content'),
+    'description' => t('Content in this collection'),
+    'weight' => 100,
+    'visible' => TRUE,
+  ];
+
+  return $fields;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ *
+ * Attach the 'collection content' as a field to the collection entity.
+ */
+function collection_rdf_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  if (!$display->getComponent('collection_content')) {
+    return;
+  }
+  $view_name = 'collection_content';
+  $display_id = 'default';
+  $view = Views::getView($view_name);
+  if (!$view || !$view->access($display_id)) {
+    return;
+  }
+  $build['collection_content'] = [
+    '#type' => 'view',
+    '#name' => $view_name,
+    '#display_id' => $display_id,
+    '#arguments' => [
+      // Use the entity id as a contextual filter.
+      $entity->id(),
+    ],
+  ];
+}
+
+/**
+ * Implements hook_field_widget_form_alter().
+ */
+function collection_field_widget_form_alter(&$element, FormStateInterface $form_state, $context) {
+  $field_name = $context['items']->getFieldDefinition()->getName();
+  if ($field_name == 'field_ar_closed') {
+    $element['#attached']['library'][] = 'collection/collection_form';
   }
 }

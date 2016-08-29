@@ -17,9 +17,11 @@ tries to follow the 'drupal-way' as much as possible.
 
 You are free to fork this project to host your own collaborative platform.
 Joinup is licensed under the
-[EUPL](https://en.wikipedia.org/wiki/European_Union_Public_Licence), which is
+[EUPL](https://joinup.ec.europa.eu/community/eupl/og_page/eupl), which is
 compatible with the GPL.
 
+## Contributing
+See our [contributors guide](.github/CONTRIBUTING.md).
 
 ## Running your own instance of Joinup
 
@@ -37,12 +39,32 @@ run the Behat test, please refer directly to the documention of
 
 ### Initial setup
 
-* Clone this repository.  Use [composer](https://getcomposer.org/) to install
-* the dependencies.  Install Virtuoso. See [setting up
+* Clone this repository.
+
+    ```
+    $ git clone https://github.com/ec-europa/joinup-dev.git
+    ```
+
+* Use [composer](https://getcomposer.org/) to install the dependencies.
+
+    ```
+    $ cd joinup-dev
+    $ composer install
+    ```
+
+* Install Solr. If you already have Solr installed you can configure it manually
+  by [following the installation
+  instructions](http://cgit.drupalcode.org/search_api_solr/plain/INSTALL.txt?h=8.x-1.x)
+  from the Search API Solr module. Or you can execute the following command to
+  download and configure a local instance of Solr. It will be installed in the
+  folder `./vendor/apache/solr`.
+
+    ```
+    $ ./vendor/bin/phing setup-apache-solr
+    ```
+
+* Install Virtuoso. See [setting up
   Virtuoso](/web/modules/custom/rdf_entity/README.md).
-* Set up a Solr search server, using the configuration provided inside the
-  `search_api_solr` module. For installation instructions, refer to
-  `INSTALL.txt` inside the `search_api_solr` module.
 * Point the document root of your webserver to the 'web/' directory.
 
 ### Create a local build properties file
@@ -107,28 +129,25 @@ Run the Behat test suite to validate your installation.
 $ cd tests; ./behat
 ```
 
+## Phing targets
 
-## Contributing
-
-* You're thinking of setting up your own code repository using the Joinup
-  codebase?
-* You are about to develop a big feature on top of this codebase?
-* You're having trouble installing this project?
-* If you want to report an issue?
-
-Use the Github issue queue to get in touch! We'd like to hear about your plans.
-
-
-## Code quality
-
-We try to keep the quality of this repository as high as possible, and
-therefore a few measures are put in place:
-* Coding standards are verified.
-* Behat tests to avoid regression.
-
-You can [check our current test scenarios here](/tests/features/).
-
-If you plan to make contributions to the Joinup codebase, we kindly ask you to
-run the coding standards checks, as well as the Behat test suite before making
-a pull request. Also make sure you add test coverage for the functionality
-covered in the pull request.
+These are some extra phing targets that will help you setup some things.
+* setup-virtuoso-permissions: For this you will need to specify some variables
+in your build.properties.local file. These parameters are
+  * sparql.host: The host of your virtuoso server
+  * sparql.port: The port of your virtuoso server
+  * sparql.dsn: The virtuoso odbc alias. Check https://github.com/AKSW/OntoWiki/wiki/VirtuosoBackend#setting-up-odbc
+  for more details.
+  * sparql.user: Your administrator username for virtuoso.
+  * sparql.password: Your administrator password for virtuoso.
+  * isql.bin = The full path of your isql (or isql-vt) binary.
+This phing target will give the SPARQL user, the update permission.
+* import-rdf-fixtures: The same variables as setup-virtuoso-permissions need to
+be set to your build.properties.local file for this to work.
+This will import rdf files located in the
+`[project root directory]/resources/fixtures` directory. In order to let
+virtuoso accept importing files from this directory, you have to append this
+directory to the configuration file of your virtuoso. Locate and open the
+virtuoso configuration file and search for the `DirsAllowed` key under the
+`[Parameters]` section and append the full path of the fixtures directory.
+Restart your virtuoso server and then you can import the rdf files.

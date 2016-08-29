@@ -3,12 +3,16 @@ status: true
 dependencies:
   config:
     - field.field.node.news.body
-    - field.field.node.news.field_kicker
-    - field.field.node.news.field_source_url
-    - field.field.node.news.og_group_ref
+    - field.field.node.news.field_news_kicker
+    - field.field.node.news.field_news_source_url
+    - field.field.node.news.field_news_state
+    - field.field.node.news.field_spatial_coverage
+    - field.field.node.news.field_topic
+    - field.field.node.news.og_audience
     - node.type.news
   module:
     - link
+    - options
     - text
     - user
 id: node.news.default
@@ -19,18 +23,18 @@ content:
   body:
     label: hidden
     type: text_default
-    weight: 101
+    weight: 1
     settings: {  }
     third_party_settings: {  }
-  field_kicker:
-    weight: 102
+  field_news_kicker:
+    weight: 2
     label: above
     settings:
       link_to_entity: false
     third_party_settings: {  }
     type: string
-  field_source_url:
-    weight: 103
+  field_news_source_url:
+    weight: 3
     label: above
     settings:
       trim_length: 80
@@ -40,7 +44,35 @@ content:
       target: ''
     third_party_settings: {  }
     type: link
+  field_news_state:
+    weight: 104
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+  field_spatial_coverage:
+    weight: 105
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+  field_topic:
+    weight: 106
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
   links:
-    weight: 100
-hidden:
-  og_group_ref: true
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+  og_audience:
+    type: entity_reference_label
+    weight: 4
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+hidden: {  }

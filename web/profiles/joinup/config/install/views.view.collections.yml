@@ -5,6 +5,7 @@ dependencies:
     - field.storage.rdf_entity.field_ar_description
     - search_api.index.collections
   module:
+    - joinup
     - search_api
     - text
 id: collections
@@ -70,9 +71,26 @@ display:
             last: 'Last »'
           quantity: 9
       style:
-        type: html_list
+        type: tiles
+        options:
+          row_class: ''
+          default_row_class: true
+          uses_fields: false
       row:
-        type: fields
+        type: search_api
+        options:
+          view_modes:
+            'entity:node':
+              custom_page: default
+              document: default
+              event: view_mode_tile
+              news: default
+            'entity:rdf_entity':
+              asset_distribution: default
+              asset_release: default
+              collection: view_mode_tile
+              licence: default
+              solution: view_mode_tile
       fields:
         search_api_language:
           table: search_api_index_collections
@@ -417,7 +435,49 @@ display:
             multi_type: separator
             multi_separator: ', '
           plugin_id: search_api_field
-      filters: {  }
+      filters:
+        rid:
+          id: rid
+          table: search_api_index_collections
+          field: rid
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: '='
+          value:
+            min: ''
+            max: ''
+            value: collection
+          group: 1
+          exposed: false
+          expose:
+            operator_id: rid_op
+            label: 'Rdf Type'
+            description: ''
+            use_operator: false
+            operator: rid_op
+            identifier: rid
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              moderator: '0'
+              administrator: '0'
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          plugin_id: search_api_string
       sorts: {  }
       title: Collections
       header: {  }

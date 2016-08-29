@@ -199,24 +199,7 @@ class Rdf extends ContentEntityBase implements RdfInterface {
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     // Standard field, used as unique if primary index.
     $fields['id'] = BaseFieldDefinition::create('uri')
-      ->setLabel(t('ID'))
-      ->setRequired(TRUE)
-      ->setDescription(t('The ID of the RDF entity.'))
-      // @todo We should use 'UniqueField' constraint here, however this casts
-      // the entity id to an int.
-      ->setTranslatable(FALSE)
-      ->setRevisionable(FALSE)
-      ->setSetting('max_length', 255)
-      ->setDisplayOptions('view', array(
-        'label' => 'hidden',
-        'type' => 'hidden',
-      ))
-      ->setDisplayOptions('form', array(
-        'type' => 'string_textfield',
-        'weight' => -10,
-      ))
-      ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', FALSE);
+      ->setLabel(t('ID'));
 
     $fields['rid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Rdf Type'))
@@ -241,22 +224,6 @@ class Rdf extends ContentEntityBase implements RdfInterface {
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
-    return $fields;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function bundleFieldDefinitions(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
-    // @todo This is the key to proper bundle fields..!
-    // @todo Only invoked after cache clear.
-    $fields = array();
-    // If ($bundle == 'admssw_softwareproject') {.
-    $fields['test'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Test bundle admssw_softwareproject'))
-      ->setDescription(t('The ID of the Contact entity.'))
-      ->setReadOnly(TRUE);
-    // }.
     return $fields;
   }
 
@@ -288,6 +255,16 @@ class Rdf extends ContentEntityBase implements RdfInterface {
   public function setName($name) {
     $this->set('name', $name);
     return $this;
+  }
+
+  /**
+   * Get weight.
+   *
+   * @todo This should be removed rdf terms have their own
+   * proper implementation.
+   */
+  public function getWeight() {
+    return 0;
   }
 
 }

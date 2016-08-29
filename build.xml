@@ -2,6 +2,7 @@
 
 <project name="Joinup" default="help">
 
+    <import file="${project.basedir}/build.common.xml" optional="true"/>
     <property file="build.properties.local" />
     <property file="build.properties" />
     <property file="build.properties.dist" />
@@ -29,48 +30,16 @@
 
     <echo msg="Loading Virtuoso Sparql Permissions task." />
     <taskdef name="setvirtuososparqlpermissions" classname="\DrupalProject\Phing\SetVirtuosoSparqlPermissions" />
+
+    <echo msg="Loading Import RDF fixtures task." />
+    <taskdef name="importrdffixtures" classname="\DrupalProject\Phing\ImportRdfFixtures" />
     
     <echo msg="Loading AWS additional tasks." />
     <import file="./vendor/continuousphp/aws-sdk-phing/tasks.xml" />
     <property name="aws.profile" value="" />
 
-    <target name="setup-aws">
-        <property name="aws.profile" value="" />
-        <aws-config region="${aws.region}" profile="${aws.profile}" />
-    </target>
-
-    <target name="delete-deployment-group">
-        <aws-deploy-delete-deployment-group
-                name="${deploy.groupName}"
-                application="${deploy.applicationName}" />
-    </target>
-
-    <target name="delete-stack" depends="delete-deployment-group">
-        <aws-cf-deletestack name="${cf.stackName}" />
-    </target>
-
-    <target name="run-stack">
-        <aws-cf-runstack
-                name="${deploy.applicationName}-${cf.stackName}"
-                updateOnConflict="true"
-                capabilities="CAPABILITY_IAM"
-                templatePath="./resources/cloudformation/single-server.template">
-            <param name="KeyName" value="${cf.KeyName}" />
-            <param name="ApplicationName" value="${deploy.applicationName}" />
-            <param name="env" value="${cf.stackName}" />
-        </aws-cf-runstack>
-    </target>
-
-    <target name="setup-deployment-group">
-        <aws-deploy-deployment-group
-                name="${cf.stackName}"
-                updateOnConflict="true"
-                deploymentConfigName="CodeDeployDefault.OneAtATime"
-                serviceRole="${deploy.serviceRole}"
-                application="${deploy.applicationName}">
-            <ec2TagFilter key="stack" value="${deploy.applicationName}-${cf.stackName}" />
-        </aws-deploy-deployment-group>
-    </target>
+    <echo msg="Loading infra additional tasks." />
+    <import file="./vendor/ec-europa/infra/infra.xml" />
 
     <!-- Make the settings folder writeable so that the installer can copy settings.php. -->
     <target name="writable-settings-folder">
@@ -114,6 +83,15 @@
             DataSourceName="${sparql.dsn}"
             Username="${sparql.user}"
             Password="${sparql.password}"
+        />
+    </target>
+
+    <target name="import-rdf-fixtures">
+        <importrdffixtures
+                IsqlPath="${isql.bin}"
+                DataSourceName="${sparql.dsn}"
+                Username="${sparql.user}"
+                Password="${sparql.password}"
         />
     </target>
 
@@ -241,6 +219,173 @@
         </drush>
     </target>
 
+    <target name="virtuoso-set-dirsallowed">
+        <echo message="Allow importing of RDF data from all directories"/>
+        <exec dir="${project.basedir}"
+              command="sudo sed -i 's/DirsAllowed              = ., \/usr\/share\/virtuoso-opensource-6.1\/vad/DirsAllowed = \//g' /etc/virtuoso-opensource-6.1/virtuoso.ini;
+sudo /etc/init.d/virtuoso-opensource-6.1 restart"
+              checkreturn="true"
+              passthru="true"/>
+    </target>
+
+    <target name="download-apache-solr">
+        <if>
+            <available file="${solr.dir}" type="dir" property="solr.dir.available" />
+            <then>
+                <echo message="Apache Solr installation directory exists (${solr.dir}), skipping download." />
+            </then>
+            <else>
+                <if>
+                    <available file="${tmp.dir}/${solr.tarball.filename}" type="file" property="solr.tarball.available" />
+                    <then>
+                        <echo message="Apache Solr tarball already downloaded to ${tmp.dir}/${solr.tarball.filename}, skipping download." />
+                    </then>
+                    <else>
+                        <mkdir dir="${tmp.dir}" />
+                        <httpget url="${solr.download.url}" dir="${tmp.dir}" />
+                    </else>
+                </if>
+                <!-- Use the faster native untar on UNIX systems. -->
+                <if>
+                    <os family="unix" />
+                    <then>
+                        <mkdir dir="${solr.vendor.dir}" />
+                        <exec
+                            command='tar xzf "${tmp.dir}/${solr.tarball.filename}" -C "${solr.vendor.dir}"'
+                            dir="${project.basedir}"
+                            passthru="true"
+                            checkreturn="true"
+                        />
+                    </then>
+                    <else>
+                        <untar file="${tmp.dir}/${solr.tarball.filename}" todir="${solr.vendor.dir}" />
+                    </else>
+                </if>
+            </else>
+        </if>
+        <!-- Create a symlink of the Solr executable in the vendor/bin directory. -->
+        <if>
+            <available file="${solr.bin}" type="file" property="file.exists"/>
+            <then>
+                <echo message="Symlink to Solr binary already exists in ${solr.bin}. Skipping creation of symlink." />
+            </then>
+            <else>
+                <symlink
+                    target="${solr.dir}/bin/solr"
+                    link="${solr.bin}"
+                />
+            </else>
+        </if>
+    </target>
+
+    <target
+        name="start-apache-solr"
+        description="Start the Apache Solr server.">
+        <!-- Check if Solr is already running before attempting to start it. -->
+        <exec dir="${solr.dir}"
+              command="./bin/solr status"
+              returnProperty="solr.status"
+              passthru="true" />
+        <if>
+            <equals arg1="${solr.status}" arg2="0" />
+            <then>
+                <echo message="Apache Solr is already running." />
+            </then>
+            <else>
+                <exec dir="${solr.dir}"
+                      command="./bin/solr start"
+                      checkreturn="true"
+                      passthru="true"/>
+            </else>
+        </if>
+    </target>
+
+    <target
+        name="restart-apache-solr"
+        description="Restart the Apache Solr server.">
+        <exec dir="${solr.dir}"
+              command="./bin/solr restart"
+              checkreturn="true"
+              passthru="true" />
+    </target>
+
+    <target
+        name="stop-apache-solr"
+        description="Stop the Apache Solr server.">
+        <exec dir="${solr.dir}"
+              command="./bin/solr stop"
+              checkreturn="true"
+              passthru="true" />
+    </target>
+
+    <target name="configure-apache-solr">
+        <if>
+            <not>
+                <available file="${solr.config.dir}" type="dir" property="solr.config.dir.available" />
+            </not>
+            <then>
+                <fail message="Search API Solr is not installed. Did you run `composer install`?" />
+            </then>
+        </if>
+        <if>
+            <available file="${solr.core.dir}" type="dir" property="solr.core.dir.available" />
+            <then>
+                <echo message="A Solr core has already been configured at ${solr.core.dir}. Skipping." />
+            </then>
+            <else>
+                <!-- Create the Solr core. -->
+                <exec dir="${solr.dir}"
+                      command="./bin/solr create_core -c ${solr.core}"
+                      checkreturn="true"
+                      passthru="true"/>
+                <!-- Copy the configuration. -->
+                <copy todir="${solr.core.dir}/conf" overwrite="true">
+                    <fileset dir="${solr.config.dir}" />
+                </copy>
+                <!-- Restart Solr so our configuration changes are picked up. -->
+                <phingcall target="restart-apache-solr" />
+            </else>
+        </if>
+    </target>
+
+    <target
+        name="setup-apache-solr"
+        description="Set up Apache Solr."
+        depends="download-apache-solr, start-apache-solr, configure-apache-solr" />
+
+    <target name="build-index">
+        <echo message="Building Solr index"/>
+        <exec dir="${project.basedir}"
+              command="sudo curl -o /opt/solr/search_api_solr.tar.gz https://ftp.drupal.org/files/projects/search_api_solr-8.x-1.0-alpha4.tar.gz;
+sudo tar xvzf /opt/solr/search_api_solr.tar.gz -C /opt/solr;
+sudo /opt/solr/bin/solr create_core -c drupal;
+sudo mkdir /opt/solr/server/solr/drupal;
+sudo rsync -avz /opt/solr/search_api_solr/solr-conf/5.x/ /opt/solr/server/solr/drupal/conf/"
+              checkreturn="true"
+              passthru="true"/>
+    </target>
+
+    <target name="restart-solr">
+        <exec dir="${project.basedir}"
+              command="sudo /opt/solr/bin/solr restart"
+              checkreturn="true"
+              passthru="true"
+              spawn="true"/>
+    </target>
+
+    <target name="solr-status">
+        <exec dir="${project.basedir}"
+              command="sudo /opt/solr/bin/solr status"
+              checkreturn="true"
+              passthru="true"/>
+    </target>
+
+    <target name="solr-query-test">
+        <exec dir="${project.basedir}"
+              command="sudo curl http://localhost:8983/solr/drupal/select?q=tid:0"
+              checkreturn="true"/>
+    </target>
+
     <!-- Set up development configuration, including on-screen error logging and debugging options. -->
     <target name="enable-dev-settings">
         <phingcall target="writable-settings-folder"/>
@@ -275,10 +420,24 @@
             <param>${drupal.modules.dev}</param>
         </drush>
     </target>
+
+    <!-- Enable modules for user acceptance testing. These are different from the
+      ones in enable-dev-modules as it can contain modules not needed for development
+      like demo content modules. -->
+    <target name="enable-uat-modules">
+        <drush
+            command="pm-enable"
+            assume="yes"
+            root="${website.drupal.dir}"
+            bin="${drush.bin}"
+            verbose="${drush.verbose}">
+            <param>${drupal.modules.uat}</param>
+        </drush>
+    </target>
     
     <target name="setup-continuousphp">
         <copy
-            file="./resources/continuousphp/odbc.ini"
+            file="./vendor/ec-europa/infra/continuousphp/odbc.ini"
             tofile="${user.home}/.odbc.ini"
             overwrite="true"
         />
@@ -311,13 +470,14 @@
     <target
         name="setup-acceptance"
         description="Set up an acceptance environment."
-        depends="create-demo-users, setup-virtuoso-permissions" />
+        depends="create-demo-users, setup-virtuoso-permissions, import-rdf-fixtures" />
 
     <target
         name="install-dev"
         description="Install the website and set up the development environment."
         depends="install, setup-dev, create-demo-users" />
 
+    <!-- provision new demo/test stack on AWS -->
     <target name="provision-stack"
             description="Provision a stack on AWS"
             depends="setup-aws, run-stack, setup-deployment-group" />

@@ -2,39 +2,49 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.rdf_entity.solution.field_is_actor
     - field.field.rdf_entity.solution.field_is_affiliations_requests
+    - field.field.rdf_entity.solution.field_is_banner
+    - field.field.rdf_entity.solution.field_is_business_process
     - field.field.rdf_entity.solution.field_is_contact_information
     - field.field.rdf_entity.solution.field_is_creation_date
     - field.field.rdf_entity.solution.field_is_description
+    - field.field.rdf_entity.solution.field_is_distribution
     - field.field.rdf_entity.solution.field_is_documentation
     - field.field.rdf_entity.solution.field_is_elibrary_creation
+    - field.field.rdf_entity.solution.field_is_has_version
     - field.field.rdf_entity.solution.field_is_included_asset
     - field.field.rdf_entity.solution.field_is_issue_tracker
-    - field.field.rdf_entity.solution.field_is_keywords
     - field.field.rdf_entity.solution.field_is_landing_page
     - field.field.rdf_entity.solution.field_is_language
-    - field.field.rdf_entity.solution.field_is_latest_release
+    - field.field.rdf_entity.solution.field_is_logo
     - field.field.rdf_entity.solution.field_is_metrics_page
     - field.field.rdf_entity.solution.field_is_moderation
     - field.field.rdf_entity.solution.field_is_modification_date
     - field.field.rdf_entity.solution.field_is_owner
-    - field.field.rdf_entity.solution.field_is_policy_domain
+    - field.field.rdf_entity.solution.field_is_product_type
     - field.field.rdf_entity.solution.field_is_related_solutions
-    - field.field.rdf_entity.solution.field_is_solution_category
     - field.field.rdf_entity.solution.field_is_solution_type
     - field.field.rdf_entity.solution.field_is_source_code_repository
-    - field.field.rdf_entity.solution.field_is_spacial_coverage
-    - field.field.rdf_entity.solution.field_is_status
-    - field.field.rdf_entity.solution.field_is_topic
+    - field.field.rdf_entity.solution.field_is_standardization_level
+    - field.field.rdf_entity.solution.field_is_state
+    - field.field.rdf_entity.solution.field_is_test_resource_type
     - field.field.rdf_entity.solution.field_is_translation
+    - field.field.rdf_entity.solution.field_is_version
     - field.field.rdf_entity.solution.field_is_webdav_creation
     - field.field.rdf_entity.solution.field_is_webdav_url
     - field.field.rdf_entity.solution.field_is_wiki
-    - field.field.rdf_entity.solution.og_group_ref
+    - field.field.rdf_entity.solution.field_keywords
+    - field.field.rdf_entity.solution.field_policy_domain
+    - field.field.rdf_entity.solution.field_spatial_coverage
+    - field.field.rdf_entity.solution.field_status
+    - image.style.thumbnail
     - rdf_entity.rdfentity.solution
   module:
     - datetime
+    - ds
     - file
+    - image
     - link
     - options
     - text
@@ -43,22 +53,51 @@ targetEntityType: rdf_entity
 bundle: solution
 mode: default
 content:
+  field_is_actor:
+    weight: 30
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
   field_is_affiliations_requests:
-    weight: 22
+    weight: 24
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+  field_is_banner:
+    weight: 35
+    label: above
+    settings:
+      image_style: banner
+      image_link: ''
+    third_party_settings:
+      ds:
+        ft:
+          id: default
+          settings:
+            lb: ''
+            lb-col: false
+            classes: {  }
+    type: image
+  field_is_business_process:
+    weight: 31
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
   field_is_contact_information:
-    weight: 0
+    weight: 5
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
   field_is_creation_date:
-    weight: -2
+    weight: 3
     label: above
     settings:
       format_type: medium
@@ -66,31 +105,56 @@ content:
     third_party_settings: {  }
     type: datetime_default
   field_is_description:
-    weight: -4
-    label: above
+    weight: 1
+    label: hidden
     settings: {  }
     third_party_settings: {  }
     type: text_default
+  field_is_distribution:
+    weight: 26
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
   field_is_documentation:
-    weight: -3
+    weight: 2
     label: above
     settings: {  }
     third_party_settings: {  }
     type: file_default
   field_is_elibrary_creation:
-    weight: 13
+    weight: 15
     label: above
     settings: {  }
     third_party_settings: {  }
     type: list_default
+  field_is_has_version:
+    weight: 27
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
   field_is_included_asset:
-    weight: 6
+    weight: 10
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
   field_is_issue_tracker:
+    weight: 21
+    label: above
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    type: link
+  field_is_landing_page:
     weight: 19
     label: above
     settings:
@@ -101,41 +165,30 @@ content:
       target: ''
     third_party_settings: {  }
     type: link
-  field_is_keywords:
-    weight: 10
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    type: entity_reference_label
-  field_is_landing_page:
-    weight: 17
-    label: above
-    settings:
-      trim_length: 80
-      url_only: false
-      url_plain: false
-      rel: ''
-      target: ''
-    third_party_settings: {  }
-    type: link
   field_is_language:
-    weight: 12
+    weight: 14
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
-  field_is_latest_release:
-    weight: 5
+  field_is_logo:
+    weight: 34
     label: above
     settings:
-      format_type: medium
-      timezone_override: ''
-    third_party_settings: {  }
-    type: datetime_default
+      image_style: thumbnail
+      image_link: ''
+    third_party_settings:
+      ds:
+        ft:
+          id: default
+          settings:
+            lb: ''
+            lb-col: false
+            classes: {  }
+    type: image
   field_is_metrics_page:
-    weight: 18
+    weight: 20
     label: above
     settings:
       trim_length: 80
@@ -146,7 +199,7 @@ content:
     third_party_settings: {  }
     type: link
   field_is_moderation:
-    weight: 14
+    weight: 16
     label: above
     settings:
       format: default
@@ -155,7 +208,7 @@ content:
     third_party_settings: {  }
     type: boolean
   field_is_modification_date:
-    weight: -1
+    weight: 4
     label: above
     settings:
       format_type: medium
@@ -163,21 +216,21 @@ content:
     third_party_settings: {  }
     type: datetime_default
   field_is_owner:
-    weight: 1
+    weight: 6
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
-  field_is_policy_domain:
-    weight: 24
+  field_is_product_type:
+    weight: 32
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
   field_is_related_solutions:
-    weight: 2
+    weight: 7
     label: above
     settings:
       link: true
@@ -191,14 +244,14 @@ content:
     third_party_settings: {  }
     type: entity_reference_label
   field_is_solution_type:
-    weight: 4
+    weight: 9
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
   field_is_source_code_repository:
-    weight: 21
+    weight: 23
     label: above
     settings:
       trim_length: 80
@@ -208,36 +261,42 @@ content:
       target: ''
     third_party_settings: {  }
     type: link
-  field_is_spacial_coverage:
-    weight: 8
+  field_is_standardization_level:
+    weight: 33
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
-  field_is_status:
-    weight: 11
+  field_is_state:
+    type: list_default
+    weight: 36
     label: above
-    settings:
-      link: true
+    settings: {  }
     third_party_settings: {  }
-    type: entity_reference_label
-  field_is_topic:
-    weight: 9
+  field_is_test_resource_type:
+    weight: 29
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
   field_is_translation:
-    weight: 7
+    weight: 11
     label: above
     settings:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
+  field_is_version:
+    weight: 28
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
   field_is_webdav_creation:
-    weight: 15
+    weight: 17
     label: above
     settings:
       format: default
@@ -246,7 +305,7 @@ content:
     third_party_settings: {  }
     type: boolean
   field_is_webdav_url:
-    weight: 16
+    weight: 18
     label: above
     settings:
       trim_length: 80
@@ -257,7 +316,7 @@ content:
     third_party_settings: {  }
     type: link
   field_is_wiki:
-    weight: 20
+    weight: 22
     label: above
     settings:
       trim_length: 80
@@ -267,12 +326,39 @@ content:
       target: ''
     third_party_settings: {  }
     type: link
+  field_keywords:
+    weight: 12
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+  field_policy_domain:
+    weight: 25
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+  field_spatial_coverage:
+    weight: 8
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+  field_status:
+    weight: 13
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
   label:
     label: hidden
     type: string
-    weight: -5
+    weight: 0
     settings:
       link_to_entity: false
     third_party_settings: {  }
-hidden:
-  og_group_ref: true
+hidden: {  }
