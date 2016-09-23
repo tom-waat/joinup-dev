@@ -17,6 +17,7 @@ dependencies:
     - field.field.rdf_entity.collection.field_ar_modification_date
     - field.field.rdf_entity.collection.field_ar_owner
     - field.field.rdf_entity.collection.field_ar_shared_content
+    - field.field.rdf_entity.collection.field_ar_state
     - field.field.rdf_entity.collection.field_policy_domain
     - field.field.rdf_entity.collection.field_spatial_coverage
     - image.style.image_style_collection_logo
@@ -272,3 +273,4 @@ content:
             fi-def-at: false
 hidden:
   field_ar_banner: true
+  field_ar_state: true

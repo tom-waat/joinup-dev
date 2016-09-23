@@ -16,6 +16,7 @@ dependencies:
     - field.field.rdf_entity.collection.field_ar_modification_date
     - field.field.rdf_entity.collection.field_ar_owner
     - field.field.rdf_entity.collection.field_ar_shared_content
+    - field.field.rdf_entity.collection.field_ar_state
     - field.field.rdf_entity.collection.field_policy_domain
     - field.field.rdf_entity.collection.field_spatial_coverage
     - rdf_entity.rdfentity.collection
@@ -117,6 +118,12 @@ content:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
+  field_is_state:
+    type: list_default
+    weight: 36
+    label: above
+    settings: {  }
+    third_party_settings: {  }
   field_policy_domain:
     weight: 8
     label: above
