@@ -23,6 +23,7 @@ dependencies:
   module:
     - datetime
     - link
+    - og
     - options
     - text
 id: rdf_entity.collection.default
@@ -145,7 +146,15 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
+  og_group:
+    weight: 0
+    type: og_group_subscribe
+    label: above
+    settings: {  }
+    third_party_settings: {  }
 hidden:
   field_ar_banner: true
   field_ar_logo: true
   field_ar_shared_content: true
+  field_ar_state: true
+  join_collection: true

@@ -27,6 +27,7 @@ dependencies:
     - ds
     - image
     - link
+    - og
     - options
     - text
 third_party_settings:
@@ -271,6 +272,13 @@ content:
             fis: false
             fis-def-at: false
             fi-def-at: false
+  og_group:
+    weight: 0
+    type: og_group_subscribe
+    label: above
+    settings: {  }
+    third_party_settings: {  }
 hidden:
   field_ar_banner: true
   field_ar_state: true
+  join_collection: true

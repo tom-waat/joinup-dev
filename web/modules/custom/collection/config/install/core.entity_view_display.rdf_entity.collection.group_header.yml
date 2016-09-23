@@ -17,6 +17,7 @@ dependencies:
     - field.field.rdf_entity.collection.field_ar_modification_date
     - field.field.rdf_entity.collection.field_ar_owner
     - field.field.rdf_entity.collection.field_ar_shared_content
+    - field.field.rdf_entity.collection.field_ar_state
     - field.field.rdf_entity.collection.field_policy_domain
     - field.field.rdf_entity.collection.field_spatial_coverage
     - image.style.banner
@@ -26,6 +27,7 @@ dependencies:
     - ds
     - image
     - joinup_core
+    - og
 third_party_settings:
   ds:
     layout:
@@ -144,6 +146,12 @@ content:
             fis: false
             fis-def-at: false
             fi-def-at: false
+  og_group:
+    weight: 0
+    type: og_group_subscribe
+    label: above
+    settings: {  }
+    third_party_settings: {  }
 hidden:
   collection_content: true
   field_ar_abstract: true
@@ -158,5 +166,6 @@ hidden:
   field_ar_modification_date: true
   field_ar_owner: true
   field_ar_shared_content: true
+  field_ar_state: true
   field_policy_domain: true
   field_spatial_coverage: true
