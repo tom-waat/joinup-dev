@@ -390,7 +390,7 @@ QUERY;
           continue;
         }
         if (empty($graph_id)) {
-          throw new \Exception("Fatal error. The graph ID whould never be empty here.");
+          throw new \Exception("Fatal error. The graph ID should never be empty here.");
         }
 
         // Map bundle and entity id.
@@ -468,7 +468,6 @@ QUERY;
   }
 
   /**
-<<<<<<< HEAD
    * {@inheritdoc}
    */
   public function loadMultiple(array $ids = NULL) {
@@ -483,111 +482,6 @@ QUERY;
   }
 
   /**
-   * Get the mapping between bundle names and their rdf objects.
-   */
-  public function getRdfBundleMapping() {
-    $bundle_rdf_bundle_mapping = [];
-    $bundle_type = $this->entityType->getBundleEntityType();
-    $entities = $this->entityTypeManager->getStorage($bundle_type)->loadMultiple();
-    foreach ($entities as $entity) {
-      $settings = $entity->getThirdPartySetting('rdf_entity', 'mapping_' . $this->bundleKey, FALSE);
-      if (!is_array($settings)) {
-        throw new \Exception('No rdf:type mapping set for bundle ' . $entity->label());
-      }
-      $type = array_pop($settings);
-      $bundle_rdf_bundle_mapping[$this->entityTypeId][$entity->id()] = $type;
-    }
-    \Drupal::moduleHandler()->alter('bundle_mapping', $bundle_rdf_bundle_mapping);
-    return $bundle_rdf_bundle_mapping;
-  }
-
-  /**
-   * Returns an rdf object for each bundle.
-   *
-   * Returns the rdf object that is specific for this bundle.
-   */
-  public function getRdfBundleList($bundles = []) {
-    $bundle_mapping = $this->getRdfBundleMapping();
-    if (empty($bundle_mapping)) {
-      return;
-    }
-    if (!$bundles) {
-      $bundles = array_keys($bundle_mapping[$this->entityTypeId]);
-    }
-    $rdf_bundles = [];
-    $bundle_mapping = $bundle_mapping[$this->entityTypeId];
-    foreach ($bundles as $bundle) {
-      if (isset($bundle_mapping[$bundle])) {
-        $rdf_bundles[] = $bundle_mapping[$bundle];
-      }
-    }
-    return "(<" . implode(">, <", $rdf_bundles) . ">)";
-  }
-
-  /**
-   * Determine the bundle types for a list of entities.
-   */
-  protected function getBundlesByIds($ids) {
-    $ids_rdf_mapping = array();
-    $bundle_mapping = $this->getRdfBundleMapping();
-    // @todo Get query through $this->getQuery, and use this wrapper...
-    $ids_string = "<" . implode(">, <", $ids) . ">";
-    $query = <<<QUERY
-SELECT ?uri, ?bundle
-WHERE {
-  ?uri rdf:type ?bundle.
-  FILTER (?uri IN (  $ids_string ))
-}
-GROUP BY ?uri
-QUERY;
-    $results = $this->sparql->query($query);
-    foreach ($results as $result) {
-      $uri = (string) $result->uri;
-      $bundle = (string) $result->bundle;
-      // @todo Why do we get multiple types for a uri?
-      if (array_search($uri, $ids_rdf_mapping)) {
-        continue;
-      }
-      if ($id = array_search($bundle, $bundle_mapping)) {
-        $ids_rdf_mapping[$uri] = $id;
-      }
-      else {
-        drupal_set_message(t('Unmapped bundle :bundle for uri :uri.',
-          array(
-            ':bundle' => $bundle,
-            ':uri' => $uri,
-          )));
-      }
-
-    }
-    return $ids_rdf_mapping;
-  }
-
-  /**
-   * Bundle - label mapping.
-   *
-   * Get a list of label predicates by bundle.
-   */
-  public function getLabelMapping() {
-    $bundle_label_mapping = array();
-    $bundle_type = $this->entityType->getBundleEntityType();
-    $entities = $this->entityTypeManager->getStorage($bundle_type)->loadMultiple();
-    foreach ($entities as $entity) {
-      $label = $this->entityType->getKey('label');
-      $settings = $entity->getThirdPartySetting('rdf_entity', 'mapping_' . $label, FALSE);
-      if (!is_array($settings)) {
-        throw new \Exception('No rdf:type mapping set for bundle ' . $entity->label());
-      }
-      $type = array_pop($settings);
-      $bundle_label_mapping[$this->entityTypeId][$type] = $entity->id();
-    }
-    \Drupal::moduleHandler()->alter('label_mapping', $bundle_label_mapping);
-    return $bundle_label_mapping;
-  }
-
-  /**
-=======
->>>>>>> ISAICP-2603
    * {@inheritdoc}
    */
   public function loadRevision($revision_id) {
