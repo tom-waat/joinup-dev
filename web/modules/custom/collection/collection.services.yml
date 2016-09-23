@@ -13,3 +13,9 @@ services:
     class: Drupal\collection\EventSubscriber\CollectionEventSubscriber
     tags:
       - { name: 'event_subscriber' }
+  collection.fulfillment_guard:
+    class: Drupal\collection\Guard\CollectionFulfillmentGuard
+    arguments: ['@joinup_core.workflow.user_provider']
+    tags:
+      - { name: state_machine.guard, group: collection }
+
