@@ -4,8 +4,8 @@ dependencies:
   module:
     - rdf_entity
     - state_machine
-id: rdf_entity.field_is_state
-field_name: field_is_state
+id: rdf_entity.field_ar_state
+field_name: field_ar_state
 entity_type: rdf_entity
 type: state
 settings: {  }

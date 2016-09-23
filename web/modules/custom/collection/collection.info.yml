@@ -17,6 +17,7 @@ dependencies:
   - owner
   - rdf_entity
   - text
+  - state_machine
 
 config_devel:
   - core.entity_form_display.rdf_entity.collection.default
@@ -36,6 +37,7 @@ config_devel:
   - field.field.rdf_entity.collection.field_ar_moderation
   - field.field.rdf_entity.collection.field_ar_modification_date
   - field.field.rdf_entity.collection.field_ar_owner
+  - field.field.rdf_entity.collection.field_ar_state
   - field.field.rdf_entity.collection.field_policy_domain
   - field.field.rdf_entity.collection.field_ar_shared_content
   - field.field.rdf_entity.collection.field_spatial_coverage
@@ -52,5 +54,6 @@ config_devel:
   - field.storage.rdf_entity.field_ar_moderation
   - field.storage.rdf_entity.field_ar_modification_date
   - field.storage.rdf_entity.field_ar_owner
+  - field.storage.rdf_entity.field_ar_state
   - field.storage.rdf_entity.field_ar_shared_content
   - rdf_entity.rdfentity.collection
