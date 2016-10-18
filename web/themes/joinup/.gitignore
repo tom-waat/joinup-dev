@@ -1,4 +1,3 @@
 # Ignore generated directories and files.
 prototype/node_modules
-prototype/styleguide
 prototype/images
