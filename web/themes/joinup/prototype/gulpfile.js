@@ -73,7 +73,7 @@ gulp.task('styleguide:generate', function() {
         server: true,
         sideNav: true,
         rootPath: paths.styleguide,
-        appRoot: '/joinup-dev/styleguide', // Additional parameter for GitHub Pages
+        appRoot: '/joinup-dev/web/themes/joinup/prototype/styleguide', // Additional parameter for GitHub Pages
         overviewPath: 'README.md',
         commonClass: 'body'
       }))
