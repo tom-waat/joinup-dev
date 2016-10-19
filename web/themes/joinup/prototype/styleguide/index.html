@@ -2,16 +2,16 @@
 <html lang="en" ng-app="sgApp">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" href="/assets/img/favicon.ico">
+  <link rel="icon" href="/joinup-dev/web/themes/joinup/prototype/styleguide/assets/img/favicon.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
     var _styleguideConfig = {"title":"Joinup styleguide","disableEncapsulation":true,"disableHtml5Mode":false,"sideNav":true};
     (function() {
       'use strict';
       var userStyleFiles = [
-          '/styleguide.css',
-          '/styleguide_pseudo_styles.css',
-          '/styleguide_helper_elements.css'
+          '/joinup-dev/web/themes/joinup/prototype/styleguide/styleguide.css',
+          '/joinup-dev/web/themes/joinup/prototype/styleguide/styleguide_pseudo_styles.css',
+          '/joinup-dev/web/themes/joinup/prototype/styleguide/styleguide_helper_elements.css'
         ],
         head = document.querySelector('head');
 
@@ -31,32 +31,32 @@
         userStyleFiles.forEach(addCssLink);
       }
 
-      addCssLink('/styleguide_at_rules.css');
-      addCssLink('/styleguide-app.css', {noReload: true});
+      addCssLink('/joinup-dev/web/themes/joinup/prototype/styleguide/styleguide_at_rules.css');
+      addCssLink('/joinup-dev/web/themes/joinup/prototype/styleguide/styleguide-app.css', {noReload: true});
     }());
   </script>
   <script type="text/ng-template" id="userStyles.html">
     <style>
-      @import url('/styleguide.css');
-      @import url('/styleguide_pseudo_styles.css');
-      @import url('/styleguide_helper_elements.css');
+      @import url('/joinup-dev/web/themes/joinup/prototype/styleguide/styleguide.css');
+      @import url('/joinup-dev/web/themes/joinup/prototype/styleguide/styleguide_pseudo_styles.css');
+      @import url('/joinup-dev/web/themes/joinup/prototype/styleguide/styleguide_helper_elements.css');
     </style>
   </script>
   <title ng-bind-html="$root.pageTitle | unsafe">Joinup styleguide</title>
-  <script src="js/material.min.js"></script>
-<script src="js/jquery.min.js"></script>
-<script src="js/styleguide.js"></script>
+  <script src="/joinup-dev/web/themes/joinup/prototype/styleguide/js/material.min.js"></script>
+<script src="/joinup-dev/web/themes/joinup/prototype/styleguide/js/jquery.min.js"></script>
+<script src="/joinup-dev/web/themes/joinup/prototype/styleguide/js/styleguide.js"></script>
   <script type="text/javascript">
     var filesConfig = [];
   </script>
-  <base href="/" />
+  <base href="/joinup-dev/web/themes/joinup/prototype/styleguide/" />
 </head>
 <body class="sg">
   
   <div class="sg view-index" ui-view></div>
-  <script src="/js/vendor.js"></script>
-  <script src="/js/app.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+  <script src="/joinup-dev/web/themes/joinup/prototype/styleguide/js/vendor.js"></script>
+  <script src="/joinup-dev/web/themes/joinup/prototype/styleguide/js/app.js"></script>
+    <script src="/joinup-dev/web/themes/joinup/prototype/styleguide/socket.io/socket.io.js"></script>
   
 </body>
 </html>
