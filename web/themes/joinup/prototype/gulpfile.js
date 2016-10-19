@@ -64,9 +64,9 @@ gulp.task('styleguide:generate', function() {
   return gulp.src(paths.sassStyleguide)
     .pipe(styleguide.generate({
         extraHead: [
-          '<script src="/js/material.min.js"></script>',
-          '<script src="/js/jquery.min.js"></script>',
-          '<script src="/js/styleguide.js"></script>',
+          '<script src="/joinup-dev/web/themes/joinup/prototype/styleguide/js/material.min.js"></script>',
+          '<script src="/joinup-dev/web/themes/joinup/prototype/styleguide/js/jquery.min.js"></script>',
+          '<script src="/joinup-dev/web/themes/joinup/prototype/styleguide/js/styleguide.js"></script>',
         ],
         disableEncapsulation: true,
         title: 'Joinup styleguide',
