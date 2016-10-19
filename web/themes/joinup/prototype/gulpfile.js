@@ -93,7 +93,8 @@ gulp.task('styleguide', ['styleguide:generate', 'styleguide:applystyles']);
 gulp.task('images', function() {
   gulp.src(['../images/**'])
     .pipe(gulp.dest(paths.styleguide + '/images'))
-    .pipe(gulp.dest('images'));
+    .pipe(gulp.dest('images'))
+    .pipe(gulp.dest('html-prototype/images'));
 });
 // Define copying javascript for styleguide task
 gulp.task('js', function() {
