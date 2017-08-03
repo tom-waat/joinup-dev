@@ -25,7 +25,7 @@ trait RdfEntityTrait {
    * @throws \InvalidArgumentException
    *   Thrown when an RDF entity with the given name and type does not exist.
    */
-  protected function getRdfEntityByLabel($label, $type = NULL) {
+  protected static function getRdfEntityByLabel($label, $type = NULL) {
     $query = \Drupal::entityQuery('rdf_entity')
       ->condition('label', $label)
       ->range(0, 1);
@@ -55,7 +55,7 @@ trait RdfEntityTrait {
    * @param string $type
    *   The RDF entity type.
    *
-   * @return \Drupal\rdf_entity\Entity\Rdf
+   * @return \Drupal\rdf_entity\RdfInterface
    *   The RDF entity.
    *
    * @throws \InvalidArgumentException
@@ -97,6 +97,26 @@ trait RdfEntityTrait {
     if ($actual != $number) {
       throw new \Exception("Wrong number of $type entities. Expected number: $number, actual number: $actual.");
     }
+  }
+
+  /**
+   * Parses human readable fields for RDF entities.
+   *
+   * This is a convenient wrapper around parseEntityFields() that handles the
+   * type casting.
+   *
+   * @param array $fields
+   *   An array of human readable field values.
+   *
+   * @return array
+   *   An array of field data as expected by the field storage handler.
+   *
+   * @see \Drupal\DrupalExtension\Context\RawDrupalContext::parseEntityFields()
+   */
+  public function parseRdfEntityFields(array $fields) {
+    $entity = (object) $fields;
+    parent::parseEntityFields('rdf_entity', $entity);
+    return (array) $entity;
   }
 
 }

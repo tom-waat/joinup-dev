@@ -1,4 +1,9 @@
-h1, h2, h3, span, a, div
+h1,
+h2,
+h3,
+span,
+a,
+div
   font-family: 'Open Sans', sans-serif
   line-height: normal
 
@@ -6,10 +11,20 @@ div
   box-sizing: border-box
 
 .main-container
+  width: 100%
+  padding-left: 16px
+  padding-right: 16px
   max-width: $container-desktop
-  width: 100%
-  box-sizing: border-box
+  margin: 0 auto
 
-.content-container
-  max-width: 784px
+.content-container--form
   width: 100%
+  .page__content
+    width: 100%
+    padding: 0
+    background-color: transparent
+    +breakpoint(tablet)
+      padding: 0
+    +breakpoint(desktop)
+      padding: 0
+

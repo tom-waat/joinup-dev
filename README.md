@@ -27,7 +27,7 @@ See our [contributors guide](.github/CONTRIBUTING.md).
 
 ### Requirements
 * A regular LAMP stack
-* Virtuoso (Triplestore database)
+* Virtuoso 7 (Triplestore database)
 * SASS compiler
 * Apache Solr
 
@@ -65,8 +65,9 @@ run the Behat test, please refer directly to the documention of
     ```
 
 * Install Virtuoso. For basic instructions, see [setting up
-  Virtuoso](/web/modules/custom/rdf_entity/README.md). During installation some
-  RDF based taxonomies will be imported from the `resources/fixtures` folder.
+  Virtuoso](/web/modules/custom/rdf_entity/README.md).
+  Due to [a bug in Virtuoso 6](https://github.com/openlink/virtuoso-opensource/issues/303) it is recommended to use Virtuoso 7.
+  During installation some RDF based taxonomies will be imported from the `resources/fixtures` folder.
   Make sure Virtuoso can read from this folder by adding it to the `DirsAllowed`
   setting in your `virtuoso.ini`. For example:
 
@@ -79,6 +80,15 @@ run the Behat test, please refer directly to the documention of
 
     ```
     $ gem install sass
+    ```
+
+* Install [Selenium](https://github.com/SeleniumHQ/docker-selenium/blob/master/README.md).
+  The simplest way of doing this is using Docker to install and run it with a
+  single command. This will download all necessary files and start the browser
+  in the background in headless mode:
+
+    ```
+    $ docker run -d -p 4444:4444 --network=host selenium/standalone-chrome
     ```
 
 * Point the document root of your webserver to the 'web/' directory.
@@ -158,6 +168,19 @@ $ cd tests
 $ ./behat
 ```
 
+During development you can enable Behat test screen-shots by uncomment this line in `tests/features/bootstrap/FeatureContext.php`:
+
+```php
+  // use \Drupal\joinup\Traits\ScreenShotTrait;
+```
+
+and use the `pretty` formatter instead of `progress`, in `tests/behat.yml`:
+
+```yaml
+  formatters:
+    pretty: ~
+```
+
 Also run the PHPUnit tests, from the web root.
 
 ```
@@ -165,13 +188,19 @@ $ cd web
 $ ../vendor/bin/phpunit
 ```
 
+
 ### Frontend development
 
 See the [readme](web/themes/joinup/README.md) in the theme folder.
 
+
 ### Technical details
 
 * In [Rdf draft module](web/modules/custom/rdf_entity/rdf_draft/README.md)
-there are information on handling draft in CRUD operations for rdf entities.
+there is information on handling draft in CRUD operations for rdf entities.
 * In [Joinup notification module](web/modules/custom/joinup_notification/README.md)
-there are information on how to handle notifications in Joinup.
+there is information on how to handle notifications in Joinup.
+* In [Joinup core module](web/modules/custom/joinup_core/README.md) there is
+information on how to handle and create workflows.
+* In [Piwik analytics](docs/piwik.md) you find information about working with
+the web analytics platform used in Joinup.

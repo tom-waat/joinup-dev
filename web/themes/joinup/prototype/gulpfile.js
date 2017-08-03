@@ -96,6 +96,12 @@ gulp.task('images', function() {
     .pipe(gulp.dest('images'))
     .pipe(gulp.dest('html-prototype/images'));
 });
+// Define copying fonts for styleguide task
+gulp.task('fonts', function() {
+  gulp.src(['../fonts/**'])
+    .pipe(gulp.dest(paths.styleguide + '/fonts'))
+    .pipe(gulp.dest('fonts'));
+});
 // Define copying javascript for styleguide task
 gulp.task('js', function() {
   gulp.src(['js/**', '../vendor/material-design-lite/material.min.js', '../../../../web/core/assets/vendor/jquery/jquery.min.js'])
@@ -103,7 +109,7 @@ gulp.task('js', function() {
 });
 
 // Listen folders for changes and apply defined tasks
-gulp.task('default', ['styleguide', 'sass', 'images', 'js', 'mustache'], function() {
+gulp.task('default', ['styleguide', 'sass', 'images', 'fonts', 'js', 'mustache'], function() {
   livereload.listen(45729);
-  gulp.watch([paths.sass, paths.html, paths.mustache], ['styleguide', 'sass', 'images', 'js', 'mustache']);
+  gulp.watch([paths.sass, paths.html, paths.mustache], ['styleguide', 'sass', 'images', 'fonts', 'js', 'mustache']);
 });

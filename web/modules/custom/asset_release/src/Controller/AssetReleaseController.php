@@ -7,6 +7,7 @@ use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\OgAccessInterface;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\rdf_entity\Entity\Rdf;
 use Drupal\rdf_entity\RdfInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -17,8 +18,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *
  * Handles the form to perform actions when it is called by a route that
  * includes an rdf_entity id.
- *
- * @package Drupal\asset_release\Controller
  */
 class AssetReleaseController extends ControllerBase {
 
@@ -110,12 +109,18 @@ class AssetReleaseController extends ControllerBase {
    *
    * @param \Drupal\rdf_entity\RdfInterface $rdf_entity
    *   The RDF entity for which the custom page is created.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The RDF entity for which the custom page is created.
    *
    * @return \Drupal\Core\Access\AccessResult
    *   The access result object.
    */
-  public function createAssetReleaseAccess(RdfInterface $rdf_entity) {
-    return $this->ogAccess->userAccessEntity('create', $this->createNewAssetRelease($rdf_entity), $this->currentUser());
+  public function createAssetReleaseAccess(RdfInterface $rdf_entity, AccountInterface $account = NULL) {
+    if ($rdf_entity->bundle() !== 'solution') {
+      throw new NotFoundHttpException();
+    }
+
+    return $this->ogAccess->userAccessEntity('create', $this->createNewAssetRelease($rdf_entity), $account);
   }
 
   /**
@@ -128,22 +133,68 @@ class AssetReleaseController extends ControllerBase {
    *   The build array for the page.
    */
   public function overview(RdfInterface $rdf_entity) {
-    $view_builder = $this->entityTypeManager()->getViewBuilder('rdf_entity');
-    $ids = $this->queryFactory->get('rdf_entity', 'AND')
+    // Retrieve all releases for this solution.
+    $ids = $this->queryFactory->get('rdf_entity')
       ->condition('rid', 'asset_release')
       ->condition('field_isr_is_version_of', $rdf_entity->id())
-      ->sort('field_isr_creation_date', 'DESC')
+      // @todo: This is a temporary fix. We need to implement the sort in the
+      // rdf entity module in order to be able to handle paging.
+      // @see: https://webgate.ec.europa.eu/CITnet/jira/browse/ISAICP-2788
+      // ->sort('field_isr_creation_date', 'DESC')
       ->execute();
 
-    $releases = [];
-    /** @var \Drupal\rdf_entity\RdfInterface $release */
-    foreach (Rdf::loadMultiple($ids) as $release) {
-      $releases[] = $view_builder->view($release, 'compact');
+    /** @var \Drupal\rdf_entity\Entity\Rdf[] $releases */
+    $releases = Rdf::loadMultiple($ids);
+
+    // Filter out any release that the current user cannot access.
+    // @todo Filter out any unpublished release. See ISAICP-3393.
+    $releases = array_filter($releases, function ($release) {
+      return $release->access('view');
+    });
+
+    // Retrieve all standalone distributions for this solution. These are
+    // downloads that are not associated with a release.
+    // The standalone distributions are not flagged in any way, and the relation
+    // between releases and distributions is backwards (the relation is present
+    // on the parent entity). We work around this by retrieving all
+    // distributions excluding the ones that are associated with a release.
+    $release_distribution_ids = [];
+    foreach ($releases as $release) {
+      foreach ($release->get('field_isr_distribution')->getValue() as $distribution_reference) {
+        $release_distribution_ids[] = $distribution_reference['target_id'];
+      }
+    }
+
+    $query = $this->queryFactory->get('rdf_entity');
+    $query
+      ->condition('rid', 'asset_distribution')
+      ->condition(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $rdf_entity->id());
+    if (!empty($release_distribution_ids)) {
+      $query->condition('id', $release_distribution_ids, 'NOT IN');
+    }
+    $standalone_distribution_ids = $query->execute();
+    $standalone_distributions = Rdf::loadMultiple($standalone_distribution_ids);
+
+    // Put a flag on the standalone distributions so they can be identified for
+    // theming purposes.
+    foreach ($standalone_distributions as $standalone_distribution) {
+      $standalone_distribution->standalone = TRUE;
+    }
+
+    $entities = $this->sortEntitiesByCreationDate(array_merge($releases, $standalone_distributions));
+
+    // Mark the first release as the latest.
+    // @see asset_release_preprocess_rdf_entity()
+    foreach ($entities as $entity) {
+      if ($entity->bundle() === 'asset_release') {
+        $entity->is_latest_release = TRUE;
+        break;
+      }
     }
 
     return [
       '#theme' => 'asset_release_releases_download',
-      '#releases' => $releases,
+      '#releases' => $entities,
     ];
   }
 
@@ -198,6 +249,38 @@ class AssetReleaseController extends ControllerBase {
       'rid' => 'asset_release',
       'field_isr_is_version_of' => $rdf_entity->id(),
     ]);
+  }
+
+  /**
+   * Sorts a list of releases and distributions by date.
+   *
+   * @param \Drupal\rdf_entity\Entity\Rdf[] $entities
+   *   The RDF entities to sort.
+   *
+   * @return \Drupal\rdf_entity\Entity\Rdf[]
+   *   The sorted RDF entities.
+   */
+  protected function sortEntitiesByCreationDate(array $entities) {
+    usort($entities, function ($entity1, $entity2) {
+      $get_creation_date = function (RdfInterface $entity) {
+        $date = $entity->bundle() === 'asset_release' ? $entity->field_isr_creation_date->value : $entity->field_ad_creation_date->value;
+        // Sort entries without a creation date on the bottom so they don't
+        // stick to the top for all eternity.
+        if (empty($date)) {
+          $date = '1970-01-01';
+        }
+        return strtotime($date);
+      };
+
+      $ct1 = $get_creation_date($entity1);
+      $ct2 = $get_creation_date($entity2);
+      if ($ct1 == $ct2) {
+        return 0;
+      }
+      return ($ct1 < $ct2) ? 1 : -1;
+    });
+
+    return $entities;
   }
 
 }

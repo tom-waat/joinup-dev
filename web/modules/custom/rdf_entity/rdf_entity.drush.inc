@@ -5,24 +5,24 @@
  * Purge the triple store from the CLI.
  */
 
-use \Drush\Log\LogLevel;
-use \Drupal\search_api\Entity\Server;
-use \Drupal\search_api_solr\Plugin\search_api\backend\SearchApiSolrBackend;
+use Drush\Log\LogLevel;
+use Drupal\search_api\Entity\Server;
+use Drupal\search_api_solr\Plugin\search_api\backend\SearchApiSolrBackend;
 
 /**
  * Implements hook_drush_command().
  */
 function rdf_entity_drush_command() {
-  $items = array();
+  $items = [];
 
-  $items['rdf-entity-purge'] = array(
+  $items['rdf-entity-purge'] = [
     'description' => 'Delete the whole index at the Sparql endpoint.',
-    'examples' => array(
+    'examples' => [
       'drush rdf-entity-purge' => dt('Purge the triple store.'),
       'drush rep' => dt('Alias to purge the triple store.'),
-    ),
-    'aliases' => array('rep'),
-  );
+    ],
+    'aliases' => ['rep'],
+  ];
   return $items;
 }
 
@@ -54,15 +54,18 @@ WHERE {
 }
 QUERY;
     $endpoint->query($query);
-
-    $backend = Server::load('solr')->getBackend();
-    if ($backend instanceof SearchApiSolrBackend && $backend->getSolrHelper()->pingCore()) {
-      $index = $backend->getServer()->getIndexes()['collections'];
-      $backend->deleteAllIndexItems($index);
+    $search_api_instances = [
+      'solr_published' => 'published',
+      'solr_unpublished' => 'unpublished',
+    ];
+    foreach ($search_api_instances as $server => $index) {
+      $backend = Server::load($server)->getBackend();
+      if ($backend instanceof SearchApiSolrBackend && $backend->getSolrConnector()->pingCore()) {
+        $index = $backend->getServer()->getIndexes()[$index];
+        $backend->deleteAllIndexItems($index);
+      }
     }
-
     drush_log('All triples have been removed.', LogLevel::INFO);
-
   }
   else {
     drush_log('Triple store is empty, nothing to delete.', LogLevel::INFO);

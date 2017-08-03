@@ -3,7 +3,6 @@
 namespace Drupal\collection\Form;
 
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -14,8 +13,6 @@ use Drupal\user\Entity\User;
 
 /**
  * Confirmation form for users that want to revoke their collection membership.
- *
- * @package Drupal\collection\Form
  */
 class LeaveCollectionConfirmForm extends ConfirmFormBase {
 
@@ -108,11 +105,6 @@ class LeaveCollectionConfirmForm extends ConfirmFormBase {
     drupal_set_message($this->t('You are no longer a member of %collection.', [
       '%collection' => $this->collection->getName(),
     ]));
-
-    // @todo: This is a temporary workaround for the lack of og cache
-    // contexts/tags. Remove this when Og provides proper cache context.
-    // @see: https://webgate.ec.europa.eu/CITnet/jira/browse/ISAICP-2628
-    Cache::invalidateTags(['user.roles']);
 
     $form_state->setRedirectUrl($this->getCancelUrl());
   }

@@ -14,7 +14,7 @@ bundle: custom_page
 label: Collection
 description: 'The collection this custom page belongs to.'
 required: false
-translatable: true
+translatable: false
 default_value: {  }
 default_value_callback: ''
 settings:
@@ -24,6 +24,5 @@ settings:
       collection: collection
     sort:
       field: _none
-    target_type: rdf_entity
   access_override: false
 field_type: og_standard_reference

@@ -9,16 +9,15 @@ use Behat\Gherkin\Node\TableNode;
 use Drupal\DrupalExtension\Context\DrupalSubContextBase;
 use Drupal\DrupalExtension\Context\DrupalSubContextInterface;
 use Drupal\joinup\Traits\EntityReferenceTrait;
+use Drupal\joinup\Traits\EntityTrait;
 use Drupal\joinup\Traits\FileTrait;
 use Drupal\joinup\Traits\NodeTrait;
-use Drupal\joinup\Traits\OgMenuTrait;
 use Drupal\joinup\Traits\OgTrait;
-use Drupal\joinup\Traits\RandomGeneratorTrait;
 use Drupal\joinup\Traits\RdfEntityTrait;
 use Drupal\joinup\Traits\WorkflowTrait;
-use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
+use Drupal\og_menu\Tests\Traits\OgMenuTrait;
 use Drupal\rdf_entity\Entity\Rdf;
 
 /**
@@ -27,11 +26,11 @@ use Drupal\rdf_entity\Entity\Rdf;
 class CollectionSubContext extends DrupalSubContextBase implements DrupalSubContextInterface {
 
   use EntityReferenceTrait;
+  use EntityTrait;
   use FileTrait;
   use NodeTrait;
   use OgMenuTrait;
   use OgTrait;
-  use RandomGeneratorTrait;
   use RdfEntityTrait;
   use WorkflowTrait;
 
@@ -73,12 +72,12 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
    * @Then I should see the following collection menu items in the specified order:
    */
   public function assertRepeatedElementContainsText(TableNode $table) {
-    $parent = $this->getSession()->getPage()->findAll('css', '.block-collection-menu-blocknavigation > ul.menu > li.menu-item');
+    $parent = $this->getSession()->getPage()->findAll('css', '.block-collection-menu-blocknavigation li.sidebar-menu__item');
     $i = 0;
     foreach ($table->getHash() as $repeatedElement) {
       $child = $parent[$i];
       \PHPUnit_Framework_Assert::assertEquals(
-        $child->find('css', '.menu-item')->getText(),
+        $child->find('css', 'a.sidebar-menu__link')->getText(),
         $repeatedElement['text']
       );
       $i++;
@@ -135,14 +134,14 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
    *
    * Table format:
    * @codingStandardsIgnoreStart
-   * title                   | abstract                                   | access url                             | closed | creation date    | description                                                                                                        | elibrary creation                     | logo | moderation | modification date | owner |
-   * Dog owner collection    | Read up on all about <strong>dogs</strong> | http://dogtime.com/dog-breeds/profiles | yes|no | 28-01-1995 12:05 | The Afghan Hound is elegance personified.                                                                          | facilitators|members|registered users |      | yes        |                   |       |
-   * Cats collection 4 ever! | Cats are cool!                             | http://mashable.com/category/cats/     | yes|no | 28-01-1995 12:06 | The domestic cat (Felis catus or Felis silvestris catus) is a small usually furry domesticated carnivorous mammal. | facilitators|members|registered users |      | no         |                   |       |
+   * | title                   | abstract                                   | access url                             | closed | creation date    | description                                                                                                        | elibrary creation                     | logo | moderation | modification date | owner | state                                                               |
+   * | Dog owner collection    | Read up on all about <strong>dogs</strong> | http://dogtime.com/dog-breeds/profiles | yes|no | 28-01-1995 12:05 | The Afghan Hound is elegance personified.                                                                          | facilitators|members|registered users |      | yes        |                   |       |                                                                     |
+   * | Cats collection 4 ever! | Cats are cool!                             | http://mashable.com/category/cats/     | yes|no | 28-01-1995 12:06 | The domestic cat (Felis catus or Felis silvestris catus) is a small usually furry domesticated carnivorous mammal. | facilitators|members|registered users |      | no         |                   |       | draft|proposed|validated|archival request|deletion request|archived |
    * @codingStandardsIgnoreEnd
    *
    * Only the title field is required.
    *
-   * @param TableNode $collection_table
+   * @param \Behat\Gherkin\Node\TableNode $collection_table
    *   The collection data.
    *
    * @throws \Exception
@@ -168,6 +167,9 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
       // Convert user friendly values to machine values.
       $values = $this->convertValueAliases($values);
 
+      // Provide default values.
+      $values = $this->provideDefaultValues($values);
+
       $this->createCollection($values);
     }
   }
@@ -176,7 +178,7 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
    * Returns the field alias mapping.
    *
    * @return array
-   *    The field alias mapping.
+   *   The field alias mapping.
    */
   protected static function collectionFieldAliases() {
     // Mapping alias - field name.
@@ -203,13 +205,36 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
   }
 
   /**
+   * Enriches the provided field values with defaults for missing values.
+   *
+   * @param array $fields
+   *   An array of fields keyed by field name.
+   *
+   * @return array
+   *   The array with default values added.
+   */
+  protected function provideDefaultValues(array $fields) {
+    $default_values = [
+      'field_ar_state' => 'draft',
+    ];
+
+    foreach ($default_values as $field => $default_value) {
+      if (!isset($fields[$field])) {
+        $fields[$field] = $default_value;
+      }
+    }
+
+    return $fields;
+  }
+
+  /**
    * Converts values from user friendly to normal machine values.
    *
    * @param array $fields
-   *    An array of fields keyed by field name.
+   *   An array of fields keyed by field name.
    *
    * @return mixed
-   *    The array with the values converted.
+   *   The array with the values converted.
    *
    * @throws \Exception
    *    Throws an exception when a mapped value is not found.
@@ -220,6 +245,14 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
       'field_ar_elibrary_creation' =>
         ['facilitators' => 0, 'members' => 1, 'registered users' => 2],
       'field_ar_closed' => ['no' => 0, 'yes' => 1],
+      'field_ar_state' => [
+        'draft' => 'draft',
+        'proposed' => 'proposed',
+        'validated' => 'validated',
+        'archival request' => 'archival_request',
+        'deletion request' => 'deletion_request',
+        'archived' => 'archived',
+      ],
     ];
 
     foreach ($fields as $field => $value) {
@@ -233,7 +266,7 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
     }
 
     // Convert any entity reference field label value with the entity id.
-    $fields = $this->convertEntityReferencesValues('rdf_entity', 'collection', $fields);
+    $fields = $this->convertEntityReferencesValues('rdf_entity', 'collection', $this->parseRdfEntityFields($fields));
 
     return $fields;
   }
@@ -255,16 +288,31 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
     $image_fields = ['field_ar_banner', 'field_ar_logo'];
     foreach ($image_fields as $field_name) {
       if (!empty($values[$field_name])) {
-        $values[$field_name] = [$this->createFile($values[$field_name], $this->getMinkParameter('files_path'))];
+        foreach ($values[$field_name] as &$filename) {
+          $filename = [$this->createFile($filename)->id()];
+        }
       }
     }
 
-    // @todo Remove this after the widget in ISAICP-2301 is build.
     $values['rid'] = 'collection';
-    $values['id'] = isset($values['id']) ? $values['id'] : $this->getRandomUri();
     $collection = Rdf::create($values);
     $collection->save();
     $this->collections[$collection->id()] = $collection;
+
+    // We have to force reindex of affiliated solutions so the relationship
+    // with this collection will be indexed in Solr.
+    if (!$collection->get('field_ar_affiliates')->isEmpty()) {
+      foreach ($collection->get('field_ar_affiliates')->referencedEntities() as $solution) {
+        // Reset the cached entity in the storage, so the "collection" computed
+        // field will be populated correctly when the solution gets loaded.
+        \Drupal::entityTypeManager()->getStorage('rdf_entity')->resetCache([$solution->id()]);
+        // In order to avoid copying code from search_api_entity_update(), we
+        // need to fake an update event. Said function requires the "original"
+        // property to be populated, so just fill it with the entity itself.
+        $solution->original = $solution;
+        search_api_entity_update($solution);
+      }
+    }
 
     return $collection;
   }
@@ -272,18 +320,21 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
   /**
    * Creates a collection with data provided in a table.
    *
+   * @codingStandardsIgnoreStart
    * Table format:
-   * | title           | Open Data Initiative                  |
-   * | author          | Mightily Oats                         |
-   * | logo            | logo.png                              |
-   * | moderation      | yes|no                                |
-   * | closed          | yes|no                                |
-   * | create elibrary | facilitators|members|registered users |
-   * | metadata url    | https://ec.europa.eu/my/url           |
+   * | title           | Open Data Initiative                                                |
+   * | author          | Mightily Oats                                                       |
+   * | logo            | logo.png                                                            |
+   * | moderation      | yes|no                                                              |
+   * | closed          | yes|no                                                              |
+   * | create elibrary | facilitators|members|registered users                               |
+   * | metadata url    | https://ec.europa.eu/my/url                                         |
+   * | state           | draft|proposed|validated|archival request|deletion request|archived |
+   * @codingStandardsIgnoreEnd
    *
    * Only the title field is required.
    *
-   * @param TableNode $collection_table
+   * @param \Behat\Gherkin\Node\TableNode $collection_table
    *   The collection data.
    *
    * @throws \Exception
@@ -308,6 +359,9 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
     // Convert user friendly values to machine values.
     $values = $this->convertValueAliases($values);
 
+    // Provide default values.
+    $values = $this->provideDefaultValues($values);
+
     $this->createCollection($values);
   }
 
@@ -321,7 +375,9 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
    */
   public function deleteCollection($collection) {
     /** @var \Drupal\rdf_entity\Entity\Rdf $collection */
-    $this->getCollectionByName($collection)->delete();
+    $collection = $this->getCollectionByName($collection);
+    $collection->skip_notification = TRUE;
+    $collection->delete();
   }
 
   /**
@@ -346,47 +402,61 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
    *   The name of the collection to check.
    * @param int $number
    *   The expected number of members in the collection.
+   * @param int $membership_state
+   *   The state of the membership. Can be either active, pending or blocked.
    *
    * @throws \Exception
    *   Thrown when the number of members does not not match the expectation.
    *
-   * @Then the :collection collection should have :number member(s)
+   * @Then the :collection collection should have :number :membership_state member(s)
    */
-  public function assertMemberCount($collection, $number) {
-    $collection = $this->getCollectionByName($collection);
+  public function assertMemberCount($collection, $number, $membership_state) {
+    $states = [
+      OgMembershipInterface::STATE_ACTIVE,
+      OgMembershipInterface::STATE_PENDING,
+      OgMembershipInterface::STATE_BLOCKED,
+    ];
 
+    if (!in_array($membership_state, $states)) {
+      throw new \Exception("Invalid membership state '{$membership_state}' found.");
+    }
+
+    $collection = $this->getCollectionByName($collection);
     $actual = \Drupal::entityQuery('og_membership')
       ->condition('entity_type', 'rdf_entity')
       ->condition('entity_id', $collection->id())
-      ->condition('state', OgMembershipInterface::STATE_ACTIVE)
+      ->condition('state', $membership_state)
       ->count()
       ->execute();
 
     if ($actual != $number) {
-      throw new \Exception("Wrong number of members. Expected number: $number, actual number: $actual.");
+      throw new \Exception("Wrong number of {$membership_state} members. Expected number: $number, actual number: $actual.");
     }
   }
 
   /**
    * Subscribes the given users to the given collections.
    *
-   * The role Id of organic group roles are consisting of 3 parts, the entity
-   * type ID and the bundle of the group, and the machine name of the role.
-   * Do not provide the complete ID of the Og role. The entity type ID and
-   * bundle are going to be added automatically.
-   *
    * Table format:
-   * | collection               | user          | roles                      |
-   * | Interoperability Friends | Verence II    | facilitator, administrator |
-   * | Electronic Surveillance  | Letice Earwig |                            |
+   * @codingStandardsIgnoreStart
+   * | collection               | user          | roles                      | state   |
+   * | Interoperability Friends | Verence II    | facilitator, administrator | active  |
+   * | Electronic Surveillance  | Letice Earwig |                            | blocked |
+   * @codingStandardsIgnoreEnd
    *
-   * @param TableNode $membership_table
+   * Only the 'collection' and 'user' columns are required. Multiple comma
+   * separated roles can be passed.
+   *
+   * The state can be empty, or one of 'active', 'pending', or 'blocked'. If the
+   * state is omitted it will default to 'active'.
+   *
+   * @param \Behat\Gherkin\Node\TableNode $membership_table
    *   The membership table.
    *
    * @throws \Exception
    *   Thrown when a collection is not found.
    *
-   * @Given (the following )collection user memberships:
+   * @Given (the following )collection user membership(s):
    */
   public function givenCollectionUserMemberships(TableNode $membership_table) {
     foreach ($membership_table->getColumnsHash() as $values) {
@@ -414,37 +484,9 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
         $roles = $this->getOgRoles($role_names, $group);
       }
 
-      $this->subscribeUserToGroup($member, $group, $roles);
-    }
-  }
+      $state = !empty($values['state']) ? $values['state'] : NULL;
 
-  /**
-   * Makes group content part of a collection.
-   *
-   * Table format:
-   * | content                | collection          |
-   * | Content entity 1 title | Collection 1 title  |
-   * | Content entity 2 title | Collection 1 title  |
-   * | Content entity 3 title | Collection 2 title  |
-   *
-   * @param string $bundle
-   *   The bundle of the content entity.
-   * @param TableNode $membership_table
-   *   The membership table.
-   *
-   * @Given (the following ):bundle content belong to the corresponding collections:
-   */
-  public function givenContentMemberships($bundle, TableNode $membership_table) {
-    // As each given step is executed in the same request
-    // we need to reset the mapping.
-    $storage = \Drupal::entityManager()->getStorage('rdf_entity');
-    $storage->getGraphHandler()->resetRequestGraphs();
-    foreach ($membership_table->getColumnsHash() as $values) {
-      $group = $this->getRdfEntityByLabel($values['collection'], 'collection');
-      /** @var \Drupal\node\NodeInterface $content */
-      $content = $this->getNodeByTitle($values['content'], $bundle);
-      $content->get(OgGroupAudienceHelperInterface::DEFAULT_FIELD)->set(0, $group->id());
-      $content->save();
+      $this->subscribeUserToGroup($member, $group, $roles, $state);
     }
   }
 
@@ -463,7 +505,7 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
    *
    * @param string $bundle
    *   The bundle of the content entity.
-   * @param TableNode $menu_table
+   * @param \Behat\Gherkin\Node\TableNode $menu_table
    *   The menu table.
    *
    * @Given (the following ):bundle content menu items for the corresponding collections:
@@ -472,21 +514,53 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
     foreach ($menu_table->getColumnsHash() as $values) {
       $group = $this->getRdfEntityByLabel($values['collection'], 'collection');
       $content = $this->getNodeByTitle($values['page'], $bundle);
-      $og_menu_instance = $this->getOgMenuInstance($group->id());
+      $og_menu_instance = $this->getOgMenuInstance($group->id(), 'navigation');
       if (empty($og_menu_instance)) {
-        $og_menu_instance = $this->createOgMenuInstance($group->id());
+        $og_menu_instance = $this->createOgMenuInstance($group->id(), 'navigation');
       }
 
       // Prepare the array to pass to MenuLinkContent::create method.
       $menu_item_data = [
         'title' => $values['label'],
         'link' => ['uri' => 'internal:/node/' . $content->id()],
-        'menu_name' => self::$ogMenuEntityTypeId . '-' . $og_menu_instance->id(),
+        'menu_name' => 'ogmenu-' . $og_menu_instance->id(),
         'weight' => $values['weight'],
         'expanded' => TRUE,
       ];
 
       $this->createOgMenuItem($menu_item_data);
+    }
+  }
+
+  /**
+   * Alters relationships between menu items for the custom pages menu.
+   *
+   * It does not create the menu items as they are created automatically when
+   * the custom pages are created.
+   *
+   * Table format:
+   * | title              | parent              | weight |
+   * | Custom page parent | Custom page child 1 |      1 |
+   * | Custom page parent | Custom page child 2 |      3 |
+   * | Custom page parent | Custom page child 3 |      2 |
+   *
+   * @param \Behat\Gherkin\Node\TableNode $menu_table
+   *   The menu table.
+   *
+   * @throws \Exception
+   *    Throws an exception if the parent item is not found.
+   *
+   * @Given (the following )custom page(s) menu structure:
+   */
+  public function givenCollectionMenuStructure(TableNode $menu_table) {
+    foreach ($menu_table->getColumnsHash() as $values) {
+      $child_link = $this->getMenuLinkByTitle($values['title']);
+      $child_link->set('weight', $values['weight']);
+      if (!empty($values['parent'])) {
+        $parent_link = $this->getMenuLinkByTitle($values['parent']);
+        $child_link->set('parent', $parent_link->getPluginId());
+      }
+      $child_link->save();
     }
   }
 
@@ -497,9 +571,9 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
    * a facilitator and a member.
    *
    * @param string $username
-   *    The name of the user.
+   *   The name of the user.
    * @param string $rdf_entity
-   *    The label of the group entity.
+   *   The label of the group entity.
    *
    * @throws \Exception
    *    Throws an exception when the user is not found.
@@ -523,6 +597,26 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
   }
 
   /**
+   * Asserts that the current user is an owner of the given collection.
+   *
+   * @param string $rdf_entity
+   *   The label of the group entity.
+   *
+   * @throws \Exception
+   *    Throws an exception when the user is not found.
+   *
+   * @see assertCollectionOwnership()
+   *
+   * @Given I should own the :rdf_entity collection
+   */
+  public function assertCollectionOwnershipCurrentUser($rdf_entity) {
+    if (!$current_user = $this->userManager->getCurrentUser()) {
+      throw new \Exception("No current user.");
+    }
+    $this->assertCollectionOwnership($current_user->name, $rdf_entity);
+  }
+
+  /**
    * Removes any created collections.
    *
    * @AfterScenario
@@ -530,6 +624,7 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
   public function cleanCollections() {
     // Remove any collections that were created.
     foreach ($this->collections as $collection) {
+      $collection->skip_notification = TRUE;
       $collection->delete();
     }
   }
@@ -544,7 +639,7 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
    * | Collection A | John | Status1          |
    * | Collection B | Jack | Status1, Status2 |
    *
-   * @param TableNode $check_table
+   * @param \Behat\Gherkin\Node\TableNode $check_table
    *   The table with the triplets collection-user-options.
    *
    * @throws \Exception
@@ -579,11 +674,11 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
    * Applies a transition to a collection.
    *
    * @param string $username
-   *    The username applying the transition.
+   *   The username applying the transition.
    * @param string $entity_name
-   *    The title of the collection.
+   *   The title of the collection.
    * @param string $to_state
-   *    The state that the collection transits to.
+   *   The state that the collection transits to.
    *
    * @throws \Exception
    *    An exception is thrown if the user is not found or the transition is not
@@ -604,6 +699,19 @@ class CollectionSubContext extends DrupalSubContextBase implements DrupalSubCont
     $transition = $collection->get('field_ar_state')->first()->getWorkflow()->getTransition($transition_id);
     $collection->get('field_ar_state')->first()->applyTransition($transition);
     $collection->save();
+  }
+
+  /**
+   * Asserts that the string "x days ago" is present on the page.
+   *
+   * @Then I see the days passed since :date
+   */
+  public function assertDaysPassedSince($date) {
+    $timestamp = strtotime($date);
+    $seconds_since = time() - $timestamp;
+    $days_since = floor($seconds_since / 86400);
+    $text = sprintf("%s days ago", $days_since);
+    $this->assertSession()->pageTextContains($text);
   }
 
 }

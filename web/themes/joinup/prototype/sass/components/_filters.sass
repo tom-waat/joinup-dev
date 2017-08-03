@@ -10,14 +10,19 @@
 // --------------------------------------------------
 .filter
   margin-bottom: 15px
+  padding-left: 0
+  position: relative
+  &:before
+    display: none
   +breakpoint(mobile)
     display: inline-block
-    margin-right: 8px
+    margin-right: 10px
     vertical-align: top
     &:last-of-type
       margin-right: 0
 
 .filters
+  padding-left: 0
   +breakpoint(sm-mobile, mobile)
     text-align: left
 
@@ -29,13 +34,20 @@
   display: inline-block
   vertical-align: middle
 
-.filter__term
-  color: $color-orange
+.filter__term a
+  text-decoration: none
+
+.filter__advanced-search a
+  text-decoration: none
+  text-transform: lowercase
 
 .filter__icon
   position: relative
+  cursor: pointer
   top: 1px
-  +icon-size(20px)
+  margin-left: 4px
+  color: $color-base
+  +icon-size(12px)
 
 .filter__dropdown-toggle
   font-size: 14px
@@ -54,13 +66,30 @@
   .filters
     margin-bottom: 0
 
+.filter__menu
+  min-width: 200px
+
+.filters--more
+  .facet-item
+    margin-bottom: 0
+    width: 100%
+
 // Modifiers
 // --------------------------------------------------
 .filters--solutions
   margin-top: 30px
   margin-bottom: 10px
 
-// Dependiencies
+.filters--horizontal
+  position: relative
+  .facet-item
+    &:before
+      content: none
+  .mdl-menu__container
+    margin-top: 5px
+
+
+// Dependencies
 // --------------------------------------------------
 .listing__header
   .filter
@@ -73,18 +102,19 @@
 .filter__dropdown-toggle
   &.is-active
     &:before
-      position: absolute
       bottom: -30px
-      left: 50%
       display: block
       width: 0
       height: 0
       content: ''
-      transform: translateX(-50%)
       border-right: 12px solid transparent
       border-bottom: 12px solid #fff
       border-left: 12px solid transparent
+      +centered($horizontal: true, $vertical: false)
 
 .filter__dropdown
   &.is-active
     display: block
+
+.filters--more
+  margin-top: 0

@@ -7,11 +7,14 @@
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Database\Database;
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FormatterInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\joinup\JoinupCustomInstallTasks;
+use Drupal\views\ViewExecutable;
 
 /**
  * Implements hook_form_FORMID_alter().
@@ -19,26 +22,26 @@ use Drupal\field\Entity\FieldStorageConfig;
  * Add the Sparql endpoint fields to the configure database install step.
  */
 function joinup_form_install_settings_form_alter(&$form, FormStateInterface $form_state) {
-  $form['sparql'] = array(
+  $form['sparql'] = [
     '#type' => 'fieldset',
     '#title' => 'Sparql endpoint',
     '#tree' => TRUE,
-  );
-  $form['sparql']['host'] = array(
+  ];
+  $form['sparql']['host'] = [
     '#type' => 'textfield',
     '#title' => 'Host',
     '#default_value' => 'localhost',
     '#size' => 45,
     '#required' => TRUE,
-  );
-  $form['sparql']['port'] = array(
+  ];
+  $form['sparql']['port'] = [
     '#type' => 'number',
     '#title' => 'Port',
     '#default_value' => '8890',
     '#min' => 0,
     '#max' => 65535,
     '#required' => TRUE,
-  );
+  ];
 
   $form['actions']['save']['#limit_validation_errors'][] = ['sparql'];
   $form['actions']['save']['#submit'][] = 'joinup_form_install_settings_form_save';
@@ -52,18 +55,18 @@ function joinup_form_install_settings_form_save($form, FormStateInterface $form_
   $port = $form_state->getValue(['sparql', 'port']);
   // @see rdf_entity.services.yml
   $key = 'sparql_default';
-  $target = 'sparql';
-  $database = array(
+  $target = 'default';
+  $database = [
     'prefix' => '',
     'host' => $host,
     'port' => $port,
     'namespace' => 'Drupal\\rdf_entity\\Database\\Driver\\sparql',
     'driver' => 'sparql',
-  );
-  $settings['databases'][$key][$target] = (object) array(
+  ];
+  $settings['databases'][$key][$target] = (object) [
     'value' => $database,
     'required' => TRUE,
-  );
+  ];
   drupal_rewrite_settings($settings);
   // Load the database connection to make it available in the current request.
   Database::addConnectionInfo($key, $target, $database);
@@ -80,6 +83,10 @@ function joinup_entity_type_alter(array &$entity_types) {
   if (!drupal_installation_attempted()) {
     /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
     $entity_types['rdf_entity']->setFormclass('propose', 'Drupal\rdf_entity\Form\RdfForm');
+
+    // Swap the default user cancel form implementation with a custom one that
+    // prevents deleting users when they are the sole owner of a collection.
+    $entity_types['user']->setFormClass('cancel', 'Drupal\joinup\Form\UserCancelForm');
   }
 }
 
@@ -102,9 +109,9 @@ function joinup_form_field_config_edit_form_alter(&$form) {
  * With this hook, we make sure that the default fields with type 'text_long'
  * have the 'content_editor' filter format as default.
  */
-function joinup_rdf_apply_default_fields_alter(FieldStorageConfig $storage, &$values) {
+function joinup_rdf_apply_default_fields_alter($type, &$values) {
   // Since the profile includes a filter format, we provide this as default.
-  if ($storage->getType() == 'text_long') {
+  if ($type == 'text_long') {
     foreach ($values as &$value) {
       if ($value['format'] == 'full_html') {
         $value['format'] = 'content_editor';
@@ -195,12 +202,123 @@ function joinup_inline_entity_form_reference_form_alter(&$reference_form, &$form
 }
 
 /**
- * Implements hook_ENTITY_TYPE_view_alter().
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * - Disable access to the revision information vertical tab.
+ *   This prevents access to the revision log and the revision checkbox too.
+ * - Disable access to the comment settings. These are managed on collection
+ *   level.
  */
-function joinup_comment_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
-  // Add contextual links to comments.
-  $build['#contextual_links']['comment'] = [
-    'route_parameters' => ['comment' => $entity->id()],
-    'metadata' => ['changed' => $entity->getChangedTime()],
+function joinup_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['revision_information']['#access'] = FALSE;
+  $form['revision']['#access'] = FALSE;
+
+  foreach (['field_comments', 'field_replies'] as $field) {
+    if (!empty($form[$field])) {
+      $form[$field]['#access'] = FALSE;
+    }
+  }
+}
+
+/**
+ * Implements hook_field_formatter_third_party_settings_form().
+ *
+ * Allow adding template suggestions for each field.
+ */
+function joinup_field_formatter_third_party_settings_form(FormatterInterface $plugin, FieldDefinitionInterface $field_definition, $view_mode, $form, FormStateInterface $form_state) {
+  $element = [];
+
+  $element['template_suggestion'] = [
+    '#type' => 'textfield',
+    '#title' => t('Template suggestion'),
+    '#size' => 64,
+    '#field_prefix' => 'field__',
+    '#default_value' => $plugin->getThirdPartySetting('joinup', 'template_suggestion'),
+  ];
+
+  return $element;
+}
+
+/**
+ * Implements hook_theme_suggestions_field_alter().
+ *
+ * Add template suggestions based on the configuration added in the formatter.
+ */
+function joinup_theme_suggestions_field_alter(array &$suggestions, array &$variables) {
+  $element = $variables['element'];
+
+  if (!empty($element['#entity_type']) && !empty($element['#bundle']) && !empty($element['#field_name'])) {
+    $entity_type = $element['#entity_type'];
+    $bundle = $element['#bundle'];
+    $field_name = $element['#field_name'];
+    // View mode is not strictly required for the functionality.
+    $view_mode = !empty($element['#view_mode']) ? $element['#view_mode'] : 'default';
+
+    // Load the related display. If not found, try to load the default as
+    // fallback. This is needed because displays like the "full" one might not
+    // be enabled but still used for rendering.
+    // @see \Drupal\Core\Entity\Entity\EntityViewDisplay::collectRenderDisplays()
+    $display = EntityViewDisplay::load($entity_type . '.' . $bundle . '.' . $view_mode);
+    if (empty($display) && $view_mode !== 'default') {
+      $display = EntityViewDisplay::load($entity_type . '.' . $bundle . '.default');
+    }
+
+    if (!empty($display)) {
+      $component = $display->getComponent($field_name);
+      if (!empty($component['third_party_settings']['joinup']['template_suggestion'])) {
+        $suggestion = 'field__' . $component['third_party_settings']['joinup']['template_suggestion'];
+        $suggestions[] = $suggestion;
+        $suggestions[] = $suggestion . '__' . $entity_type;
+        $suggestions[] = $suggestion . '__' . $entity_type . '__' . $bundle;
+        $suggestions[] = $suggestion . '__' . $entity_type . '__' . $bundle . '__' . $field_name;
+        $suggestions[] = $suggestion . '__' . $entity_type . '__' . $bundle . '__' . $field_name . '__' . $view_mode;
+
+        // Add the custom template suggestion back in the element to allow other
+        // modules to have this information.
+        $variables['element']['#joinup_template_suggestion'] = $suggestion;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_views_pre_view().
+ */
+function joinup_views_pre_view(ViewExecutable $view) {
+  // The collections overview varies by the user's memberships. For example if
+  // you are the owner of a proposed collection you can see it, while a non-
+  // member won't be able to see it yet.
+  // Note that for page displays this currently only affects the query result
+  // cache in Views, not the render cache. ViewPageController::handle() only
+  // sets a cache context when contextual links are enabled.
+  // @todo Solve this properly on render cache level by providing a dedicated
+  //   property like _view_display_cache_contexts on the router object which is
+  //   created in PathPluginBase::getRoute(). We can then use this to output the
+  //   correct cache contexts in ViewPageController::handle().
+  // @see https://www.drupal.org/node/2839058
+  if (in_array($view->id(), ['collections', 'solutions', 'content_overview'])) {
+    $view->display_handler->display['cache_metadata']['contexts'][] = 'og_role';
+    $view->display_handler->display['cache_metadata']['contexts'][] = 'user.roles';
+  }
+}
+
+/**
+ * Implements hook_install_tasks_alter().
+ */
+function joinup_install_tasks_alter(&$tasks, $install_state) {
+  $tasks['joinup_remove_simplenews_defaults'] = [
+    'function' => [JoinupCustomInstallTasks::class, 'removeSimpleNewsDefaults'],
+  ];
+}
+
+/**
+ * Implements hook_theme().
+ */
+function joinup_theme($existing, $type, $theme, $path) {
+  return [
+    'joinup_legal_notice' => [
+      'variables' => [],
+      'path' => drupal_get_path('profile', 'joinup') . '/templates',
+    ],
   ];
 }
