@@ -17,7 +17,7 @@
     
 <header class="section section--header">
   <div class="mdl-layout__header-row">
-    <a href="../html-prototype/index.html" class="header-logo mdl-layout-title" title="Home">
+    <a href="../html-prototype/homepage.html" class="header-logo mdl-layout-title" title="Home">
       <img src="../../images/logo.png">
     </a>
     <div class="mdl-layout-spacer"></div>
@@ -43,7 +43,7 @@
       </a>
     </nav>
     <div class="mdl-layout-spacer"></div>
-    <div class="search-bar search-bar--header mdl-textfield mdl-js-textfield mdl-textfield--expandable
+    <div class="search-bar search-bar--header search-bar--white mdl-textfield mdl-js-textfield mdl-textfield--expandable
     mdl-textfield--floating-label mdl-textfield--align-right">
       <label class="search-bar__label header__search-icon mdl-button mdl-js-button mdl-button--icon"
       for="search-bar__input">
@@ -84,7 +84,7 @@
       <div class="featured__logo">
         <img src="../../images/featured-img.png">
       </div>
-      <h1 class="featured__text">Exemplary solution</h1>
+      <h1 class="featured__text">Single solution</h1>
       <div class="featured__stats">
         <div class="stats__column">
           <div class="stats__wrapper">
@@ -99,21 +99,7 @@
           </div>
         </div>
       </div>
-      <button class="button button--blue-light mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Download</button>
-      <!-- Menu visible on tablet and mobile -->
-      <div class="featured__menu">
-        <div id="featured__menu-button" class="featured__menu-button mdl-button mdl-js-button">
-          <span class="icon icon--menu"></span>
-        </div>
-        <ul class="featured__menu-dropdown mdl-menu mdl-menu--bottom-left mdl-js-menu" for="featured__menu-button">
-          <li class="featured__menu-item mdl-menu__item"><a class="featured__menu-link" href="../html-prototype/solution.html">Overview</a></li>
-          <li class="featured__menu-item mdl-menu__item"><a class="featured__menu-link" href="../html-prototype/solution-distribution.html">Distribution</a></li>
-          <li class="featured__menu-item mdl-menu__item"><a class="featured__menu-link" href="../html-prototype/solution-release.html">Release</a></li>
-          <li class="featured__menu-item mdl-menu__item"><a class="featured__menu-link" href="../html-prototype/solution-download.html">Download</a></li>
-          <li class="featured__menu-item mdl-menu__item"><a class="featured__menu-link" href="../html-prototype/solution-events.html">Events</a></li>
-          <li class="featured__menu-item mdl-menu__item"><a class="featured__menu-link" href="../html-prototype/solution-about.html">About</a></li>
-        </ul>
-      </div>
+      <button class="featured__form-button button button--blue-light mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Download releases</button>
     </div>
   </div>
   <div class="featured__menu-wrapper">
@@ -149,49 +135,58 @@
     <!-- Section featured end -->
     <!-- Section content start -->
     <div class="section section--content">
-      <div class="main-container mdl-grid">  
-        <div class="section section--sidebar-left mdl-cell mdl-cell--2-col">
-            
+      <div class="main-container">
+        <div class="row">
+          <div class="mdl-grid">
+            <div class="section section--sidebar-left mdl-cell mdl-cell--2-col">
+                
 <div class="sidebar-menu">
-  <button id="sidebar-menu__button" class="sidebar-menu__button mdl-button mdl-js-button mdl-button--icon">
+  <button id="sidebar-menu__button" class="sidebar-menu__button sidebar-menu__button--mobile mdl-button mdl-js-button mdl-button--icon">
     <span class="icon icon--menu"></span>
   </button>
-  <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu" for="sidebar-menu__button">
-  	<li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution.html">Overview</a></li>
-    <li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution-distribution.html">Distribution</a></li>
-    <li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution-release.html">Release</a></li>
-    <li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution-download.html">Download</a></li>
-    <li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution-events.html">Events</a></li>
-    <li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution-about.html">About</a></li>
-  </ul>
+  <nav class="mdl-menu mdl-menu--bottom-left mdl-js-menu sidebar-menu__container" for="sidebar-menu__button">
+    <ul class="menu">
+    	<li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution.html">Overview</a></li>
+      <li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution-distribution.html">Distribution</a></li>
+      <li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution-release.html">Release</a></li>
+      <li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution-download.html">Download</a></li>
+      <li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution-events.html">Events</a></li>
+      <li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution-about.html">About</a></li>
+      <li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution-discussion-open.html">Discussion - open</a></li>
+      <li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution-discussion-login.html">Discussion - login</a></li>
+      <li class="sidebar-menu__item mdl-menu__item"><a class="sidebar-menu__link" href="../html-prototype/solution-discussion-disabled.html">Discussion - disabled</a></li>
+    </ul>
+  </nav>
 </div>
 
-        </div>
-        <div class="section section--main mdl-cell mdl-cell--8-col">       
-          <div class="page__title">
-            <h1>Oasis UBL v2.1</h1>
-            <div class="etiquette etiquette--blue">Latest release</div>
-            <div class="details details--solution">
-              <div class="details__element">
-                <div class="value gray underline">dc9ee36</div>
-              </div>
-              <div class="details__element">
-                <div class="value gray">25 days ago</div>
-              </div>
             </div>
-          </div>
-          <div class="page__content">
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut vitae nisi augue. Vestibulum rhoncus augue neque, a iaculis augue fermentum aliquam. Nullam nulla nunc, luctus finibus elementum sit amet, lobortis a nisl. Donec rhoncus tincidunt vulputate.
-            </p>
-            <p>
-              Suspendisse a metus nec est gravida eleifend sed eget enim. Mauris semper, ligula at iaculis tristique, magna felis dapibus nunc, vel tristique sem arcu sed eros. Fusce mattis urna malesuada lorem congue molestie.
-            </p>
-            <div class="action-link__wrapper right">
-              <a href="/" class="action-link">
-                <span class="action-link__icon icon icon--share"></span>
-                <span class="action-link__link">Share</a>
-              </a>
+            <div class="section section--main mdl-cell mdl-cell--8-col">       
+              <div class="page__title">
+                <h1>Oasis UBL v2.1</h1>
+                <div class="etiquette etiquette--blue">Latest release</div>
+                <div class="details details--solution">
+                  <div class="details__element">
+                    <div class="value gray underline">dc9ee36</div>
+                  </div>
+                  <div class="details__element">
+                    <div class="value gray">25 days ago</div>
+                  </div>
+                </div>
+              </div>
+              <div class="page__content">
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut vitae nisi augue. Vestibulum rhoncus augue neque, a iaculis augue fermentum aliquam. Nullam nulla nunc, luctus finibus elementum sit amet, lobortis a nisl. Donec rhoncus tincidunt vulputate.
+                </p>
+                <p>
+                  Suspendisse a metus nec est gravida eleifend sed eget enim. Mauris semper, ligula at iaculis tristique, magna felis dapibus nunc, vel tristique sem arcu sed eros. Fusce mattis urna malesuada lorem congue molestie.
+                </p>
+                <div class="action-link__wrapper right">
+                  <a href="/" class="action-link">
+                    <span class="action-link__icon icon icon--share"></span>
+                    <span class="action-link__link">Share</a>
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -200,15 +195,17 @@
     <!-- Section content end -->
     <!-- Section post-content start -->
     <div class="section section--post-content">
-      <div class="main-container mdl-grid">
-        <div class="listing listing--grid mdl-cell--8-col mdl-cell--2-offset-desktop">
-          <div class="row">
-            <div class="mdl-grid">
-              <div class="listing__header mdl-cell mdl-cell--12-col">
-                <h3 class="listing__block-title">Distributions:</h3>
-              </div>
+      <div class="main-container">
+        <div class="row">
+          <div class="mdl-grid mdl-grid--center">
+            <div class="listing listing--grid mdl-cell--8-col">
+              <div class="row">
+                <div class="mdl-grid">
+                  <div class="listing__header mdl-cell mdl-cell--12-col">
+                    <h3 class="listing__block-title">Distributions:</h3>
+                  </div>
 
-<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col">
+<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col mdl-cell--3-col-wide">
   <div class="listing__card listing__card--detail-container mdl-card">
     <div class="listing__metadata">
       <div class="listing__field">
@@ -233,7 +230,7 @@
     </div>
   </div>
 </div>
-<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col">
+<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col mdl-cell--3-col-wide">
   <div class="listing__card listing__card--detail-container mdl-card">
     <div class="listing__metadata">
       <div class="listing__field">
@@ -258,7 +255,7 @@
     </div>
   </div>
 </div>
-<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col">
+<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col mdl-cell--3-col-wide">
   <div class="listing__card listing__card--detail-container mdl-card">
     <div class="listing__metadata">
       <div class="listing__field">
@@ -283,7 +280,7 @@
     </div>
   </div>
 </div>
-<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col">
+<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col mdl-cell--3-col-wide">
   <div class="listing__card listing__card--detail-container mdl-card">
     <div class="listing__metadata">
       <div class="listing__field">
@@ -308,7 +305,7 @@
     </div>
   </div>
 </div>
-<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col">
+<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col mdl-cell--3-col-wide">
   <div class="listing__card listing__card--detail-container mdl-card">
     <div class="listing__metadata">
       <div class="listing__field">
@@ -333,225 +330,260 @@
     </div>
   </div>
 </div>
-<div class="listing__item listing__item--load-more mdl-cell mdl-cell--4-col">
-  <a href="/" class="load-more">
+<div class="listing__item listing__item--load-more mdl-cell mdl-cell--4-col mdl-cell--3-col-wide">
+  <a href="#" class="load-more">
     <div class="load-more__wrapper">
       <div class="load-more__icon icon icon--load"></div>
       <div class="load-more__text">Load more</div>
     </div>
   </a>
-</div>              
-            </div>
-          </div>
-        </div>
-        <div class="listing listing--grid mdl-cell--8-col mdl-cell--2-offset-desktop">
-          <div class="row">
-            <div class="mdl-grid">
-              <div class="listing__header mdl-cell mdl-cell--12-col">
-                <h3 class="listing__block-title">Documentation:</h3>
+</div>                  
+                </div>
               </div>
-
-<div class="listing__item listing__item--tile mdl-cell mdl-cell--12-col">
-  <div class="listing__card listing__card--inline-containers mdl-card">
-    <div class="listing__image listing__image--default">
-      <span class="icon icon--mime-pdf"></span>
-    </div>
-    <div class="listing__metadata">
-      <div class="listing__field">
-        <a href="/" class="listing__title">User_manual.pdf</a>
-      </div>
-      <div class="listing__field">
-        <div class="details">
-          <div class="details__element">
-            <div class="value">2 MB</div>
-          </div>
-          <div class="details__element">
-            <div class="value">PDF</div>
-          </div>
-        </div>
-      </div>
-      <div class="listing__field">
-        <p class="listing__teaser">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc consequat sagittis odio ac tempus.
-        </p>
-      </div>
-      <div class="listing__action-link__wrapper action-link__wrapper right">
-        <a href="/" class="listing__action-link action-link">Download</a>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="listing__item listing__item--tile mdl-cell mdl-cell--12-col">
-  <div class="listing__card listing__card--inline-containers mdl-card">
-    <div class="listing__image listing__image--default">
-      <span class="icon icon--mime-pdf"></span>
-    </div>
-    <div class="listing__metadata">
-      <div class="listing__field">
-        <a href="/" class="listing__title">User_manual.pdf</a>
-      </div>
-      <div class="listing__field">
-        <div class="details">
-          <div class="details__element">
-            <div class="value">2 MB</div>
-          </div>
-          <div class="details__element">
-            <div class="value">PDF</div>
-          </div>
-        </div>
-      </div>
-      <div class="listing__field">
-        <p class="listing__teaser">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc consequat sagittis odio ac tempus.
-        </p>
-      </div>
-      <div class="listing__action-link__wrapper action-link__wrapper right">
-        <a href="/" class="listing__action-link action-link">Download</a>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="listing__item listing__item--tile mdl-cell mdl-cell--12-col">
-  <div class="listing__card listing__card--inline-containers mdl-card">
-    <div class="listing__image listing__image--default">
-      <span class="icon icon--mime-pdf"></span>
-    </div>
-    <div class="listing__metadata">
-      <div class="listing__field">
-        <a href="/" class="listing__title">User_manual.pdf</a>
-      </div>
-      <div class="listing__field">
-        <div class="details">
-          <div class="details__element">
-            <div class="value">2 MB</div>
-          </div>
-          <div class="details__element">
-            <div class="value">PDF</div>
-          </div>
-        </div>
-      </div>
-      <div class="listing__field">
-        <p class="listing__teaser">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc consequat sagittis odio ac tempus.
-        </p>
-      </div>
-      <div class="listing__action-link__wrapper action-link__wrapper right">
-        <a href="/" class="listing__action-link action-link">Download</a>
-      </div>
-    </div>
-  </div>
-</div>
-
             </div>
+            <div class="listing listing--grid mdl-cell--8-col">
+              <div class="row">
+                <div class="mdl-grid">
+                  <div class="listing__header mdl-cell mdl-cell--12-col">
+                    <h3 class="listing__block-title">Documentation:</h3>
+                  </div>
+
+<div class="listing__item listing__item--tile mdl-cell mdl-cell--12-col">
+  <div class="listing__card listing__card--inline-containers mdl-card">
+    <div class="listing__image listing__image--default">
+      <span class="icon icon--mime-pdf"></span>
+    </div>
+    <div class="listing__metadata">
+      <div class="listing__field">
+        <a href="/" class="listing__title">User_manual.pdf</a>
+      </div>
+      <div class="listing__field">
+        <div class="details">
+          <div class="details__element">
+            <div class="value">2 MB</div>
+          </div>
+          <div class="details__element">
+            <div class="value">PDF</div>
           </div>
         </div>
-        <div class="listing listing--grid listing--separated mdl-cell--8-col mdl-cell--2-offset-desktop">
-          <div class="row">
-            <div class="mdl-grid">
-              <div class="listing__header mdl-cell mdl-cell--12-col">
-                <h3 class="listing__block-title">Shared in</h3>
+      </div>
+      <div class="listing__field">
+        <p class="listing__teaser">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc consequat sagittis odio ac tempus.
+        </p>
+      </div>
+      <div class="listing__action-link__wrapper action-link__wrapper right">
+        <a href="/" class="listing__action-link action-link">Download</a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="listing__item listing__item--tile mdl-cell mdl-cell--12-col">
+  <div class="listing__card listing__card--inline-containers mdl-card">
+    <div class="listing__image listing__image--default">
+      <span class="icon icon--mime-pdf"></span>
+    </div>
+    <div class="listing__metadata">
+      <div class="listing__field">
+        <a href="/" class="listing__title">User_manual.pdf</a>
+      </div>
+      <div class="listing__field">
+        <div class="details">
+          <div class="details__element">
+            <div class="value">2 MB</div>
+          </div>
+          <div class="details__element">
+            <div class="value">PDF</div>
+          </div>
+        </div>
+      </div>
+      <div class="listing__field">
+        <p class="listing__teaser">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc consequat sagittis odio ac tempus.
+        </p>
+      </div>
+      <div class="listing__action-link__wrapper action-link__wrapper right">
+        <a href="/" class="listing__action-link action-link">Download</a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="listing__item listing__item--tile mdl-cell mdl-cell--12-col">
+  <div class="listing__card listing__card--inline-containers mdl-card">
+    <div class="listing__image listing__image--default">
+      <span class="icon icon--mime-pdf"></span>
+    </div>
+    <div class="listing__metadata">
+      <div class="listing__field">
+        <a href="/" class="listing__title">User_manual.pdf</a>
+      </div>
+      <div class="listing__field">
+        <div class="details">
+          <div class="details__element">
+            <div class="value">2 MB</div>
+          </div>
+          <div class="details__element">
+            <div class="value">PDF</div>
+          </div>
+        </div>
+      </div>
+      <div class="listing__field">
+        <p class="listing__teaser">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc consequat sagittis odio ac tempus.
+        </p>
+      </div>
+      <div class="listing__action-link__wrapper action-link__wrapper right">
+        <a href="/" class="listing__action-link action-link">Download</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+                </div>
               </div>
+            </div>
+            <div class="listing listing--grid listing--separated mdl-cell--8-col">
+              <div class="row">
+                <div class="mdl-grid">
+                  <div class="listing__header mdl-cell mdl-cell--12-col">
+                    <h3 class="listing__block-title">Shared in</h3>
+                  </div>
 
-<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col">
+<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col mdl-cell--3-col-wide">
   <div class="listing__card listing__card--stats-container mdl-card">
     <div class="listing__image">
-      <img src="../../images/tile-image.png">
+      <img src="../../images/demo/tile_1.png">
     </div>
     <div class="listing__metadata">
-    <div class="listing__field">
-      <img class="listing__avatar" src="../../images/login-icon.png">
-    </div>
-    <div class="listing__field">
-      <h2 class="listing__title">Optimy</h2>
-    </div>
-    <div class="listing__field">
-      <p class="listing__teaser">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-      Aenan convallis.</p>
-    </div>
-    <div class="listing__field listing__stats mdl-card__actions">
-      <div class="listing__stat">
-        <span class="listing__text">154</span>
-        <span class="listing__icon icon icon--download"></span>
+      <div class="listing__field listing__avatar">
+        <img class="avatar avatar--50" src="../../images/demo/user_1.png">
       </div>
-      <div class="listing__stat">
-        <span class="listing__text">13</span>
-        <span class="listing__icon icon icon--user"></span>
+      <div class="listing__field">
+        <h2 class="listing__title">Optimy</h2>
       </div>
-      <div class="listing__stat">
-        <span class="listing__text">22</span>
-        <span class="listing__icon icon icon--like"></span>
+      <div class="listing__field">
+        <p class="listing__teaser">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        Aenan convallis.</p>
       </div>
-    </div>        
+      <div class="listing__field listing__stats mdl-card__actions">
+        <div class="listing__stat">
+          <span class="listing__text">154</span>
+          <span class="listing__icon icon icon--download"></span>
+        </div>
+        <div class="listing__stat">
+          <span class="listing__text">13</span>
+          <span class="listing__icon icon icon--user"></span>
+        </div>
+        <div class="listing__stat">
+          <span class="listing__text">22</span>
+          <span class="listing__icon icon icon--like"></span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col">
+<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col mdl-cell--3-col-wide">
   <div class="listing__card listing__card--stats-container mdl-card">
     <div class="listing__image">
-      <img src="../../images/tile-image.png">
+      <img src="../../images/demo/tile_1.png">
     </div>
     <div class="listing__metadata">
-    <div class="listing__field">
-      <img class="listing__avatar" src="../../images/login-icon.png">
-    </div>
-    <div class="listing__field">
-      <h2 class="listing__title">Optimy</h2>
-    </div>
-    <div class="listing__field">
-      <p class="listing__teaser">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-      Aenan convallis.</p>
-    </div>
-    <div class="listing__field listing__stats mdl-card__actions">
-      <div class="listing__stat">
-        <span class="listing__text">154</span>
-        <span class="listing__icon icon icon--download"></span>
+      <div class="listing__field listing__avatar">
+        <img class="avatar avatar--50" src="../../images/demo/user_1.png">
       </div>
-      <div class="listing__stat">
-        <span class="listing__text">13</span>
-        <span class="listing__icon icon icon--user"></span>
+      <div class="listing__field">
+        <h2 class="listing__title">Optimy</h2>
       </div>
-      <div class="listing__stat">
-        <span class="listing__text">22</span>
-        <span class="listing__icon icon icon--like"></span>
+      <div class="listing__field">
+        <p class="listing__teaser">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        Aenan convallis.</p>
       </div>
-    </div>        
+      <div class="listing__field listing__stats mdl-card__actions">
+        <div class="listing__stat">
+          <span class="listing__text">154</span>
+          <span class="listing__icon icon icon--download"></span>
+        </div>
+        <div class="listing__stat">
+          <span class="listing__text">13</span>
+          <span class="listing__icon icon icon--user"></span>
+        </div>
+        <div class="listing__stat">
+          <span class="listing__text">22</span>
+          <span class="listing__icon icon icon--like"></span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col">
+<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col mdl-cell--3-col-wide">
   <div class="listing__card listing__card--stats-container mdl-card">
     <div class="listing__image">
-      <img src="../../images/tile-image.png">
+      <img src="../../images/demo/tile_1.png">
     </div>
     <div class="listing__metadata">
-    <div class="listing__field">
-      <img class="listing__avatar" src="../../images/login-icon.png">
-    </div>
-    <div class="listing__field">
-      <h2 class="listing__title">Optimy</h2>
-    </div>
-    <div class="listing__field">
-      <p class="listing__teaser">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-      Aenan convallis.</p>
-    </div>
-    <div class="listing__field listing__stats mdl-card__actions">
-      <div class="listing__stat">
-        <span class="listing__text">154</span>
-        <span class="listing__icon icon icon--download"></span>
+      <div class="listing__field listing__avatar">
+        <img class="avatar avatar--50" src="../../images/demo/user_1.png">
       </div>
-      <div class="listing__stat">
-        <span class="listing__text">13</span>
-        <span class="listing__icon icon icon--user"></span>
+      <div class="listing__field">
+        <h2 class="listing__title">Optimy</h2>
       </div>
-      <div class="listing__stat">
-        <span class="listing__text">22</span>
-        <span class="listing__icon icon icon--like"></span>
+      <div class="listing__field">
+        <p class="listing__teaser">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        Aenan convallis.</p>
       </div>
-    </div>        
+      <div class="listing__field listing__stats mdl-card__actions">
+        <div class="listing__stat">
+          <span class="listing__text">154</span>
+          <span class="listing__icon icon icon--download"></span>
+        </div>
+        <div class="listing__stat">
+          <span class="listing__text">13</span>
+          <span class="listing__icon icon icon--user"></span>
+        </div>
+        <div class="listing__stat">
+          <span class="listing__text">22</span>
+          <span class="listing__icon icon icon--like"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="listing__item listing__item--tile mdl-cell mdl-cell--4-col mdl-cell--3-col-wide">
+  <div class="listing__card listing__card--stats-container mdl-card">
+    <div class="listing__image">
+      <img src="../../images/demo/tile_1.png">
+    </div>
+    <div class="listing__metadata">
+      <div class="listing__field listing__avatar">
+        <img class="avatar avatar--50" src="../../images/demo/user_1.png">
+      </div>
+      <div class="listing__field">
+        <h2 class="listing__title">Optimy</h2>
+      </div>
+      <div class="listing__field">
+        <p class="listing__teaser">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        Aenan convallis.</p>
+      </div>
+      <div class="listing__field listing__stats mdl-card__actions">
+        <div class="listing__stat">
+          <span class="listing__text">154</span>
+          <span class="listing__icon icon icon--download"></span>
+        </div>
+        <div class="listing__stat">
+          <span class="listing__text">13</span>
+          <span class="listing__icon icon icon--user"></span>
+        </div>
+        <div class="listing__stat">
+          <span class="listing__text">22</span>
+          <span class="listing__icon icon icon--like"></span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -560,6 +592,98 @@
     <!-- Section post-content end -->
 
 <footer class="section section--footer">
+  <div class="footer__first">
+    <div class="main-container">
+      <div class="row">
+        <div class="mdl-grid mdl-grid--center">
+          <div class="mdl-cell mdl-cell--8-col">
+            <div class="row">
+              <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--4-col">
+                  <h3 class="footer__site-name">
+                    <a href="#">Joinup</a>
+                  </h3>
+                </div>
+                <div class="mdl-cell mdl-cell--4-col">
+                  <div class="social-media">
+                    <ul class="social-media__menu">
+                      <li class="social-media__item">
+                        <h3 class="social-media__label">Follow us</h3>
+                      </li>
+                      <li class="social-media__item">
+                        <a href="#" class="social-media__link">
+                          <span class="icon icon--facebook"></span>
+                          <span class="text">Facebook</span>
+                        </a>
+                      </li>
+                      <li class="social-media__item">
+                        <a href="#" class="social-media__link">
+                          <span class="icon icon--linkedin"></span>
+                          <span class="text">LinkedIn</span>
+                        </a>
+                      </li>
+                      <li class="social-media__item">
+                        <a href="#" class="social-media__link">
+                          <span class="icon icon--twitter"></span>
+                          <span class="text">Twitter</span>
+                        </a>
+                      </li>
+                      <li class="social-media__item">
+                        <a href="#" class="social-media__link" target="_blank">
+                          <span class="icon icon--gplus"></span>
+                          <span class="text">Google+</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mdl-cell mdl-cell--4-col">
+                  <ul class="vertical-menu">
+                    <li class="vertical-menu__item">
+                      <a href="#" class="vertical-menu__link">Contact</a>
+                    </li>
+                    <li class="vertical-menu__item">
+                      <a href="#" class="vertical-menu__link">Site map</a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer__second">
+    <div class="main-container">
+      <div class="row">
+        <div class="mdl-grid mdl-grid--center">
+          <div class="mdl-cell mdl-cell--8-col">
+            <ul class="ec-menu">
+              <li class="ec-menu__item">
+                <a href="http://ec.europa.eu/info/about-commissions-new-web-presence_en" class="ec-menu__link">About the Commission's new web presence</a>
+              </li>
+              <li class="ec-menu__item">
+                <a href="http://ec.europa.eu/info/resources-partners_en" class="ec-menu__link">Resources for partners</a>
+              </li>
+              <li class="ec-menu__item">
+                <a href="http://ec.europa.eu/info/cookies_en" class="ec-menu__link">Cookies</a>
+              </li>
+              <li class="ec-menu__item">
+                <a href="http://ec.europa.eu/info/legal-notice_en" class="ec-menu__link">Legal notice</a>
+              </li>
+              <li class="ec-menu__item">
+                <a href="http://ec.europa.eu/info/contact_en" class="ec-menu__link">Contact</a>
+              </li>
+              <li class="ec-menu__item">
+                <a href="http://ec.europa.eu/info/europa-analytics_en" class="ec-menu__link">Europa Analytics</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </footer>
     
   </div>
@@ -567,6 +691,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script defer src="../material-design-lite/material.min.js"</script>
     <script defer src="../../js/script.js"</script>
+    <script defer src="../js/script.js"</script>
     <script>
     $(document).ready(function(){
       $('[data-toggle="popover"]').popover();
